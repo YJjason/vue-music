@@ -1,35 +1,40 @@
 <template>
   <div class="recommend">
-    <div class="recommend-content">
-      <div class="slider-wrapper" v-if="recommends.length">
-        <!--slider 组件-->
-        <slider>
-          <div v-for="item in recommends" :key="item.id">
-            <!--<router-link :to="item.linkUrl" class="linkUrl">
-              <img :src="item.picUrl" alt="">
-            </router-link>-->
-            <a :href="item.linkUrl">
-              <img :src="item.picUrl" alt="">
-            </a>
-          </div>
-        </slider>
-      </div>
-      <div class="recommend-list">
-        <h1 class="list-title"> 热门歌单推荐</h1>
-        <ul>
-          <li v-for="item in recommendList" class="item">
-            <div class="icon">
-              <img width="60px" height="60px"
-                   :src="item.imgurl" alt="">
+    <scroll ref="scroll" class="recommend-content"
+            :data="recommendList">
+      <div>
+        <div class="slider-wrapper"
+             v-if="recommends.length">
+          <!--slider 组件-->
+          <slider>
+            <div v-for="item in recommends"
+                 :key="item.id">
+              <a :href="item.linkUrl">
+                <!--needsclick 解决click 和fastclick 点击冲突-->
+                <img :src="item.picUrl" alt=""
+                     class="needsclick"
+                     @load="loadImage">
+              </a>
             </div>
-            <div class="text">
-              <h2 class="name" v-html="item.creator.name"></h2>
-              <p class="desc" v-html="item.dissname"></p>
-            </div>
-          </li>
-        </ul>
+          </slider>
+        </div>
+        <div class="recommend-list">
+          <h1 class="list-title"> 热门歌单推荐</h1>
+          <ul>
+            <li v-for="item in recommendList" class="item">
+              <div class="icon">
+                <img width="60px" height="60px"
+                     v-lazy="item.imgurl" alt="">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
@@ -39,6 +44,7 @@
 
   //进入基础组件 slider
   import Slider from '../../base/slider/slider'
+  import Scroll from '../../base/scroll/scroll'
 
   export default {
     name: "recommend",
@@ -49,7 +55,8 @@
       }
     },
     components: {
-      Slider
+      Slider,
+      Scroll
     },
     created() {
       this._getRecommend()
@@ -69,6 +76,13 @@
             this.recommendList = res.data.list
           }
         })
+      },
+      loadImage() {
+        if (!this.checkLoaded) {
+          this.$refs.scroll.refresh()
+          this.checkLoaded = true
+        }
+
       }
     }
   }

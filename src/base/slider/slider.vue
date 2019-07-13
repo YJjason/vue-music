@@ -96,7 +96,6 @@
             pageIndex -= 1
           }
           this.currentPageIndex = pageIndex
-          console.log('current', this.currentPageIndex)
           //滚动一页之后判断你是否自动轮播
           if (this.autoPlay) {
             clearTimeout(this.timer)

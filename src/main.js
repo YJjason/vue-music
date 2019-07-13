@@ -3,6 +3,11 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import VueLzayLoad from 'vue-lazyload'
+
+Vue.use(VueLzayLoad, {
+  loading: require('@/common/image/default.png')
+})
 
 import fastclick from 'fastclick'
 // 移动端300ms 延迟
