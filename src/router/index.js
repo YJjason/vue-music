@@ -15,7 +15,7 @@ export default new Router({
     },
     {
       path: '/recommend',
-      component: Recommend,
+      component: Recommend
     },
     {
       path: '/singer',

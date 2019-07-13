@@ -43,6 +43,7 @@
       position: absolute
       top: 0
       right: 0
+
       .icon-mine
         display: block
         padding: 12px
