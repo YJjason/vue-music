@@ -17,6 +17,16 @@
       <div class="recommend-list">
         <h1 class="list-title"> 热门歌单推荐</h1>
         <ul>
+          <li v-for="item in recommendList" class="item">
+            <div class="icon">
+              <img width="60px" height="60px"
+                   :src="item.imgurl" alt="">
+            </div>
+            <div class="text">
+              <h2 class="name" v-html="item.creator.name"></h2>
+              <p class="desc" v-html="item.dissname"></p>
+            </div>
+          </li>
         </ul>
       </div>
     </div>
@@ -24,7 +34,7 @@
 </template>
 
 <script>
-  import {getRecommend} from "../../api/recommend";
+  import {getRecommend, getDiscList} from "../../api/recommend";
   import {ERR_OK} from "../../api/config";
 
   //进入基础组件 slider
@@ -34,7 +44,8 @@
     name: "recommend",
     data() {
       return {
-        recommends: ''
+        recommends: [],
+        recommendList: []
       }
     },
     components: {
@@ -42,6 +53,7 @@
     },
     created() {
       this._getRecommend()
+      this._getDiscList()
     },
     methods: {
       _getRecommend() {
@@ -49,10 +61,15 @@
           if (res.code === ERR_OK) {
             this.recommends = res.data.slider
           }
-          console.log('recommends', this.recommends)
+        })
+      },
+      _getDiscList() {
+        getDiscList().then(res => {
+          if (res.code === ERR_OK) {
+            this.recommendList = res.data.list
+          }
         })
       }
-
     }
   }
 </script>

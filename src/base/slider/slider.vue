@@ -1,4 +1,4 @@
-<template>
+`<template>
   <div class="slider" ref="slider">
     <div class="slider-group" ref="sliderGroup">
       <slot>
@@ -117,6 +117,10 @@
           this.slider.goToPage(pageIndex, 0, 400)
         }, this.interval)
       }
+    },
+    // 组件销毁，清除定时器
+    destroyed() {
+      clearTimeout(this.timer)
     }
   }
 </script>
@@ -169,3 +173,4 @@
           border-radius: 5px
           background: $color-text-ll
 </style>
+`
