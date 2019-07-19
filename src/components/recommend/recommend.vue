@@ -10,7 +10,7 @@
             <div v-for="item in recommends"
                  :key="item.id">
               <a :href="item.linkUrl">
-                <!--needsclick 解决click 和fastclick 点击冲突-->
+                <!--needsclick 解决click 和fastclick 点击冲突 如果fastclick监听到有class为needsclick就不会拦截-->
                 <img :src="item.picUrl" alt=""
                      class="needsclick"
                      @load="loadImage">

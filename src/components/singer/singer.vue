@@ -27,6 +27,7 @@
     methods: {
       _getSongerList() {
         getSingerList().then(res => {
+          console.log(1222,res)
           if (res.code == 0) {
             this.singers = this._normalizeSinger(res.data.list)
           }
