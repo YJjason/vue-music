@@ -1,16 +1,17 @@
 <template>
   <div class="singer">
-    <ul>
-      <li class="list-group" v-for="group in singers">
-        <h2 class="list-group-title">{{group.Fsinger_name}}</h2>
-      </li>
-    </ul>
+    <!-- listview列表组件 -->
+    <list-view :data="singers"></list-view>
   </div>
 </template>
 
 <script>
   import {getSingerList} from '../../api/singer'
   import Singer from '../../common/js/singer'
+  import {ERR_OK} from '../../api/config'
+  //列表组件
+  import ListView from '../../base/listview/listview'
+
 
   const HOT_SINGER_LEN = 10
   const HOT_NAME = '热门'
@@ -21,18 +22,22 @@
         singers: []
       }
     },
+    components:{
+      ListView
+    },
     created() {
-      this._getSongerList()
+      this._getSingerList()
     },
     methods: {
-      _getSongerList() {
+      _getSingerList() {
         getSingerList().then(res => {
           console.log(1222,res)
-          if (res.code == 0) {
+          if (res.code === ERR_OK) {
             this.singers = this._normalizeSinger(res.data.list)
           }
         })
       },
+      // 两种数据 热门数据，字母排序数据
       _normalizeSinger(list) {
         let map = {
           hot: {
@@ -41,7 +46,9 @@
           }
         }
         list.forEach((item, index) => {
+          // 取数据的前10条为热门歌曲
           if (index < HOT_SINGER_LEN) {
+            // 抽象singer 类
             map.hot.items.push(new Singer({
               name: item.Fsinger_name,
               id: item.Fsinger_mid
@@ -60,8 +67,8 @@
           }))
         })
         //为了得到有序列表，我们需要处理 map
-        let ret = []
-        let hot = []
+        let ret = []   // 序列
+        let hot = []  // 热门
         for (let key in map) {
           let val = map[key]
           if (val.title.match(/[a-zA-Z]/)) {
@@ -74,7 +81,6 @@
           return a.title.charCodeAt(0) - b.title.charCodeAt(0)
         })
         return hot.concat(ret)
-
       }
     }
   }
