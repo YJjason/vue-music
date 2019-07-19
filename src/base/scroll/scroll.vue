@@ -48,8 +48,16 @@
       enable() {
         this.scroll && this.scroll.disable()
       },
+      // 刷新
       refresh() {
         this.scroll && this.scroll.refresh()
+      },
+      //滚动到那
+      scrollTo() {
+        this.scroll && this.scroll.scrollTo.apply(this.scroll,arguments)
+      },
+      scrollToElement(){
+        this.scroll&&this.scroll.scrollToElement.apply(this.scroll,arguments)
       }
     }
   }

@@ -18,7 +18,18 @@ export function addClass(el, className) {
   el.className = newClass.join(' ')
 }
 
-export function hasClass(el, className) {
+export function hasClass (el, className) {
   let reg = RegExp('(^|\\s)' + className + '(\\s|$)')
   return reg.test(el.className)
+}
+
+// 获取触发dom事件元素的值
+export function getData (el, name, val) {
+  const prefix = 'data-'
+  name = prefix + name
+  if (val) {
+    return el.setAttribute(name, val)
+  } else {
+    return el.getAttribute(name)
+  }
 }

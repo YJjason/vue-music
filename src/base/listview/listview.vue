@@ -1,7 +1,9 @@
 <template>
-    <scroll class="listview" :data=data>
+    <scroll class="listview"
+      ref="listview"
+     :data=data>
         <ul >
-            <li class="list-group"
+            <li class="list-group" ref="listGroup"
              v-for="(group,index) in data" :key="index">
             <h2 class="list-group-title">{{group.title}}</h2>
             <ul>
@@ -14,13 +16,40 @@
             </ul>
             </li>
         </ul>
+        <!--右侧快速入口 -->
+        <div class="list-shortcut"
+         @touchstart='onShortcutTouchStart'
+         @touchmove.stop.prevent='onShortcutTouchMove'>
+          <ul>
+            <li class="item"
+             v-for="(item,index) in shortcutList"
+             :key="index"
+             :data-index='index'>
+                {{item}}
+            </li>
+          </ul>
+        </div>
     </scroll>
 </template>
 <script>
 
 import Scroll from '../../base/scroll/scroll'
+import {getData} from '../../common/js/dom'
+
+const  ANCHOR_HEIGHT=18  // 右侧快速入口 每一个的高度
+
 
 export default {
+
+  data(){
+    return{
+
+    }
+  },
+
+  created(){
+    this.touch={}
+  },
 
   props:{
     data:{
@@ -28,11 +57,43 @@ export default {
       default:[]
     }
   },
+  computed:{
+    // 右侧快速入口列表
+    shortcutList(){
+      return this.data.map(group=>{
+        return group.title.substr(0,1)
+      })
+    }
+  },
   components:{
     Scroll
+  },
+  methods:{
+    // touch 事件
+    onShortcutTouchStart(e){
+      // 获取右侧快速入口点击的是哪个的下标
+      let anchorIndex =getData(e.target,'index')
+      //记录开始位置
+      let firstTouch = e.targets[0]
+      this.touch.y1=firstTouch.pageY
+      this.touch.anchorIndex =anchorIndex
+      //定位到第几个快速入口对应的列表位置
+      // this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex],0)
+      this._scrolllTo(anchorIndex)
+    },
+    onShortcutTouchMove(e){ // 监听滑动列表 ，同步右侧快速入口
+      let secondTouch = e.targets[0]
+      this.touch.y2=secondTouch.pageY
+      let dalta = (this.touch.y2-this.touch.y1)/ ANCHOR_HEIGHT |0
+      let anchorIndex = this.touch.anchorIndex+delta
+      this._scrolllTo(anchorIndex)
+    },
+    _scrolllTo(index){
+      this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex],0)
+    }
   }
 
-  }
+}
 </script>
 
 
