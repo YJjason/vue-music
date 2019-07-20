@@ -1,14 +1,19 @@
 <template>
     <scroll class="listview"
       ref="listview"
-     :data=data>
+     :data=data
+     :listenScroll="listenScroll"
+     @scroll="scroll"
+     :probeType="probeType"
+     >
         <ul >
             <li class="list-group" ref="listGroup"
              v-for="(group,index) in data" :key="index">
             <h2 class="list-group-title">{{group.title}}</h2>
             <ul>
               <li class="list-group-item"
-              v-for="(item,index) in group.items" :key="index">
+              v-for="(item,index) in group.items"
+              :key="index">
               <!-- 图片懒加载 -->
                 <img class="avatar" v-lazy="item.avatar" alt="">
                 <span class="name">{{item.name}}</span>
@@ -24,7 +29,9 @@
             <li class="item"
              v-for="(item,index) in shortcutList"
              :key="index"
-             :data-index='index'>
+             :data-index='index'
+             :class="{'current':currentIndex==index}"
+             >
                 {{item}}
             </li>
           </ul>
@@ -43,12 +50,18 @@ export default {
 
   data(){
     return{
+      scrollY:-1, //滚动位置
+      currentIndex:0,  //标记右侧快速入口位置 高亮
 
     }
   },
 
   created(){
-    this.touch={}
+    this.touch={},
+    // 是否派发滚动事件
+    this.listenScroll=true,
+    this.listHeight=[],
+    this.probeType=3  //连续滚动，带有惯性缓冲
   },
 
   props:{
@@ -65,6 +78,33 @@ export default {
       })
     }
   },
+  watch:{
+    data() {
+      setTimeout(()=>{
+        //dom 渲染之后计算dom高度
+          this._calculateHeight()
+      },20)
+    },
+    scrollY(newY){
+      console.log(12,newY)
+      const listHeight = this.listHeight
+      // 滚动动顶部，向下拉 newY >0
+      if(newY>0){
+        this.currentIndex=0
+      }
+      //中间位置滚动
+      for(let i=0;i<listHeight.length-1;i++){
+          let height1=listHeight[i]
+          let height2=listHeight[i+1]
+          if((-newY)>=height1&&-newY<height2){
+            this.currentIndex=i
+            return
+          }
+      }
+      // 滚动到底部，向上拉 -newY>最后一个元素上限
+      this.currentIndex=listHeight.length-2
+    }
+  },
   components:{
     Scroll
   },
@@ -73,23 +113,41 @@ export default {
     onShortcutTouchStart(e){
       // 获取右侧快速入口点击的是哪个的下标
       let anchorIndex =getData(e.target,'index')
-      //记录开始位置
-      let firstTouch = e.targets[0]
+      //记录开始位置 手指出发位置
+      let firstTouch = e.touches[0]
       this.touch.y1=firstTouch.pageY
       this.touch.anchorIndex =anchorIndex
       //定位到第几个快速入口对应的列表位置
-      // this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex],0)
+      //this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex],0)
       this._scrolllTo(anchorIndex)
     },
     onShortcutTouchMove(e){ // 监听滑动列表 ，同步右侧快速入口
-      let secondTouch = e.targets[0]
+      let secondTouch = e.touches[0]
       this.touch.y2=secondTouch.pageY
-      let dalta = (this.touch.y2-this.touch.y1)/ ANCHOR_HEIGHT |0
-      let anchorIndex = this.touch.anchorIndex+delta
+      //偏移几个锚点
+      let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT |0
+      let anchorIndex = parseInt(this.touch.anchorIndex)+ delta
+
       this._scrolllTo(anchorIndex)
     },
+    //派发滚动事件
+    scroll(pos){
+      this.scrollY =pos.y
+    },
     _scrolllTo(index){
-      this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex],0)
+      this.$refs.listview.scrollToElement(this.$refs.listGroup[index],0) // 第二个参数 动画时间
+    },
+    // 计算滚动高度在那个区域
+    _calculateHeight(){
+      this.listHeight=[]
+      const list = this.$refs.listGroup
+      let height=0
+      this.listHeight.push(height)
+      for(let i=0;i<list.length;i++){
+        let item = list[i]
+        height+=parseInt(item.clientHeight)
+        this.listHeight.push(height)
+      }
     }
   }
 

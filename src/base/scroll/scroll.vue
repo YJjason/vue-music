@@ -21,6 +21,11 @@
       data: {
         type: Array,
         default: null
+      },
+      // 是否监听滚动事件
+      listenScroll:{
+        type:Boolean,
+        default:false
       }
     },
     watch: {
@@ -44,6 +49,13 @@
           probeType: this.probeType,
           click: this.click,
         })
+        if(this.listenScroll){
+          let _this =this
+          // 触发滚动事件，pos 滚动位置
+          this.scroll.on('scroll',(pos)=>{
+            _this.$emit('scroll',pos)
+          })
+        }
       },
       enable() {
         this.scroll && this.scroll.disable()
