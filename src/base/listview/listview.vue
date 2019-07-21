@@ -86,7 +86,7 @@ export default {
       },20)
     },
     scrollY(newY){
-      console.log(12,newY)
+      // console.log(12,newY)
       const listHeight = this.listHeight
       // 滚动动顶部，向下拉 newY >0
       if(newY>0){
@@ -135,6 +135,18 @@ export default {
       this.scrollY =pos.y
     },
     _scrolllTo(index){
+      console.log(index)
+      // 快速入口上下末端空白位置
+      if(!index && index!==0){
+        return
+      }
+      //滚动到最上面和最下面
+      if(index<0){
+        index=0
+      }else if(index>this.listHeight.length-2){
+        index = this.listHeight.length-2
+      }
+      this.scrollY=-this.listenScroll[index]
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index],0) // 第二个参数 动画时间
     },
     // 计算滚动高度在那个区域
