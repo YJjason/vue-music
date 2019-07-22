@@ -13,6 +13,7 @@
             <ul>
               <li class="list-group-item"
               v-for="(item,index) in group.items"
+              @click="selectItem(item)"
               :key="index">
               <!-- 图片懒加载 -->
                 <img class="avatar" v-lazy="item.avatar" alt="">
@@ -185,7 +186,12 @@ export default {
         height+=parseInt(item.clientHeight)
         this.listHeight.push(height)
       }
+    },
+    //跳转到详情页
+    selectItem(item){
+      this.$emit('select',item)
     }
+
   }
 
 }

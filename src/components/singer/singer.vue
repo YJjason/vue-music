@@ -1,7 +1,11 @@
 <template>
   <div class="singer">
     <!-- listview列表组件 -->
-    <list-view :data="singers"></list-view>
+    <list-view :data="singers"
+    @select="selectSinger"
+    ></list-view>
+    <!-- 详情子路由 -->
+    <router-view></router-view>
   </div>
 </template>
 
@@ -81,6 +85,11 @@
           return a.title.charCodeAt(0) - b.title.charCodeAt(0)
         })
         return hot.concat(ret)
+      },
+      selectSinger(singer){
+          this.$router.push({
+            path:`/singer/${singer.id}`
+          })
       }
     }
   }
