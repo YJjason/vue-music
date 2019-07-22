@@ -36,15 +36,22 @@
             </li>
           </ul>
         </div>
+        <div class="list-fixed" v-show="fixedTitle" ref=fixed>
+          <h1 class="fixed-title">{{fixedTitle}}</h1>
+        </div>
+        <div v-show="!data.length" class="loading-container">
+          <loading></loading>
+        </div>
     </scroll>
 </template>
 <script>
 
 import Scroll from '../../base/scroll/scroll'
 import {getData} from '../../common/js/dom'
+import Loading from '../../base/loading/loading'
 
 const  ANCHOR_HEIGHT=18  // 右侧快速入口 每一个的高度
-
+const  TITLE_HEIGHT=30
 
 export default {
 
@@ -52,7 +59,7 @@ export default {
     return{
       scrollY:-1, //滚动位置
       currentIndex:0,  //标记右侧快速入口位置 高亮
-
+      diff:''
     }
   },
 
@@ -76,7 +83,14 @@ export default {
       return this.data.map(group=>{
         return group.title.substr(0,1)
       })
+    },
+    fixedTitle(){
+      if(this.scrollY>0){
+        return
+      }
+      return this.data[this.currentIndex] ?this.data[this.currentIndex].title:''
     }
+
   },
   watch:{
     data() {
@@ -92,21 +106,32 @@ export default {
       if(newY>0){
         this.currentIndex=0
       }
-      //中间位置滚动
+      //中间部分滚动
       for(let i=0;i<listHeight.length-1;i++){
           let height1=listHeight[i]
           let height2=listHeight[i+1]
           if((-newY)>=height1&&-newY<height2){
             this.currentIndex=i
+            this.diff = height2+newY
             return
           }
       }
       // 滚动到底部，向上拉 -newY>最后一个元素上限
       this.currentIndex=listHeight.length-2
+    },
+    // 滚动顶部固定栏
+    diff(newVal){
+      let fixedTop =(newVal>0 && newVal<TITLE_HEIGHT)?newVal-TITLE_HEIGHT:0
+      if(this.fixedTop===fixedTop){
+        return
+      }
+      this.fixedTop=fixedTop
+      this.$refs.fixed.style.transform=`translate3d(0,${fixedTop},0)`
     }
   },
   components:{
-    Scroll
+    Scroll,
+    Loading
   },
   methods:{
     // touch 事件
@@ -136,7 +161,7 @@ export default {
     },
     _scrolllTo(index){
       console.log(index)
-      // 快速入口上下末端空白位置
+      // 快速入口上下末端空白位置 null
       if(!index && index!==0){
         return
       }
@@ -146,7 +171,7 @@ export default {
       }else if(index>this.listHeight.length-2){
         index = this.listHeight.length-2
       }
-      this.scrollY=-this.listenScroll[index]
+      this.scrollY= -this.listenScroll[index]
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index],0) // 第二个参数 动画时间
     },
     // 计算滚动高度在那个区域
