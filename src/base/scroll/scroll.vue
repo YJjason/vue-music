@@ -22,6 +22,10 @@
         type: Array,
         default: null
       },
+      bounce:{
+        top:true,
+        bottom:true
+      },
       // 是否监听滚动事件
       listenScroll:{
         type:Boolean,
@@ -51,7 +55,7 @@
         })
         if(this.listenScroll){
           let _this =this
-          // 触发滚动事件，pos 滚动位置
+          //监听当前实例上的自定义事件 滚动事件，pos 滚动位置
           this.scroll.on('scroll',(pos)=>{
             _this.$emit('scroll',pos)
           })
@@ -64,7 +68,7 @@
       refresh() {
         this.scroll && this.scroll.refresh()
       },
-      //滚动到那
+      //滚动到指定的位置，
       scrollTo() {
         this.scroll && this.scroll.scrollTo.apply(this.scroll,arguments)
       },
