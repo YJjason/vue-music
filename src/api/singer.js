@@ -27,12 +27,13 @@ export function getSingerList () {
   return jsonp(url, data, options)
 }
 
-//歌手详情
-export function getSingerDetail(singerId) {
+// 歌手详情
+export function getSingerDetail (singerId) {
   const url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
 
   const data = Object.assign({}, commonParam, {
     hostUin: 0,
+    loginUin: 0,
     needNewCode: 0,
     platform: 'yqq',
     order: 'listen',

@@ -15,6 +15,8 @@
   import {ERR_OK} from '../../api/config'
   //列表组件
   import ListView from '../../base/listview/listview'
+//语法糖
+  import {mapMutations} from 'vuex'
 
 
   const HOT_SINGER_LEN = 10
@@ -33,9 +35,9 @@
       this._getSingerList()
     },
     methods: {
+
       _getSingerList() {
         getSingerList().then(res => {
-          console.log(1222,res)
           if (res.code === ERR_OK) {
             this.singers = this._normalizeSinger(res.data.list)
           }
@@ -90,7 +92,12 @@
           this.$router.push({
             path:`/singer/${singer.id}`
           })
-      }
+          //实现mutations 的提交  相当于 this.$store.xxx.commit()
+          this.setSinger(singer)
+      },
+      ...mapMutations({
+        setSinger:'SET_SINGER', // 映射，对应于mutation-types 中的 SET_SINGER 常量
+      })
     }
   }
 </script>

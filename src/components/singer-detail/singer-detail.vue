@@ -5,7 +5,7 @@
     <div class="singer-detail">
       <ul>
         <li v-for="item in songs">
-         <span> {{item.musicData.songname}}</span>
+         <span> {{item.name}}</span>
         </li>
       </ul>
     </div>
@@ -17,6 +17,7 @@
   import {getSingerDetail} from '../../api/singer'
   import {createSong} from '../../common/js/song'
   import {ERR_OK} from "../../api/config";
+  import {mapGetters} from 'vuex'
 
   export default {
     data() {
@@ -25,29 +26,40 @@
       }
     },
     created() {
+      console.log(11,this.singer)
       this._getDetail()
+    },
+    computed:{
+        // 取mapMutations 执行设置的数据
+        ...mapGetters([
+          'singer',
+        ])
     },
     methods:{
       _getDetail(){
         if(!this.singer.id){
-          this.$router.push('/signer')
+          this.$router.push('/singer')
           return
         }
         getSingerDetail(this.singer.id).then(res=>{
           if(res.code===ERR_OK){
-            // this.songs=this._normalizeSongs(res.data.list)
-            this.songs=res.data.list
+            this.songs=this._normalizeSongs(res.data.list)
+            // this.songs=res.data.list
+            console.log(this.songs)
           }
         })
       },
       _normalizeSongs(list){
+        console.log('list',list)
         let ret =[]
         list.forEach(item=>{
           let {musicData} =item
-          if(musicData.id&&musicData.albumid){
+          if(musicData.songmid && musicData.albumid){
             ret.push(createSong(musicData))
           }
         })
+        console.log(1221,ret)
+        return ret
       }
     }
 
