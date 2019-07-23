@@ -29,12 +29,11 @@
     },
     methods:{
       _getDetail(){
-       /* if(!this.singer.id){
+        if(!this.singer.id){
           this.$router.push('/signer')
           return
-        }*/
-        getSingerDetail('002J4UUk29y8BY').then(res=>{
-          console.log(23,res)
+        }
+        getSingerDetail(this.singer.id).then(res=>{
           if(res.code===ERR_OK){
             // this.songs=this._normalizeSongs(res.data.list)
             this.songs=res.data.list
