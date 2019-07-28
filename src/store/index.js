@@ -7,7 +7,7 @@ import state from './state'
 
 import createLogger from 'vuex/dist/logger'
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 // 调试工具
 const debug = process.env.NODE_ENV !== 'production'
 
@@ -19,5 +19,5 @@ let store = new Vuex.Store({
   strict: debug,  // state 的修改是否来源mutation
   plugins: debug ? [createLogger()] : []
 
-})
+});
 export default store
