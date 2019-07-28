@@ -7,7 +7,6 @@
     :title="title"
     :bg-image="bgImage"
     >
-
     </music-list>
 
   </transition>
@@ -28,7 +27,6 @@
       }
     },
     created() {
-      console.log(11,this.singer);
       this._getDetail()
     },
     components:{
@@ -63,11 +61,10 @@
         let ret =[];
         list.forEach(item=>{
           let {musicData} =item;
-          if(musicData.songmid && musicData.albumid){
+          if(musicData.songmid && musicData.albummid){
             ret.push(createSong(musicData))
           }
         });
-        console.log(1221,ret);
         return ret
       }
     }
@@ -78,14 +75,14 @@
 <style lang="stylus" scoped rel="stylesheet/stylus">
   @import '../../common/stylus/variable';
 
-  .singer-detail
+/*  .singer-detail
     position: fixed
     z-index: 100
     top: 0
     left: 0
     right: 0
     bottom: 0
-    background: $color-background
+    background: $color-background*/
 
   .slide-enter-active, slide-leave-active
     transition: all 0.3s

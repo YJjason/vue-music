@@ -1,9 +1,10 @@
 <template>
   <div class="singer">
-    <!-- listview列表组件 -->
+    <!-- listview 列表组件 -->
     <list-view :data="singers"
-    @select="selectSinger"
-    ></list-view>
+    @select="selectSinger">
+
+    </list-view>
     <!-- 详情子路由 -->
     <router-view></router-view>
   </div>

@@ -5,15 +5,19 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
-      <div class="filter">
-
-      </div>
+      <div class="filter"></div>
     </div>
-<!-- 公共滚动组件-->
-    <scroll :data="songs" class="list" ref="list">
-       <div class="song-list-wrapper">
-         <song-list :songs="songs"></song-list>
-       </div>
+    <!--    用户上下滑动列表-->
+    <div class="bg-layer" ref="layer"></div>
+    <!-- 公共滚动组件-->
+    <scroll :data="songs" class="list"
+            :probe-type="probeType"
+            :listen-scroll="listenScroll"
+            @scroll="scroll"
+            ref="list">
+      <div class="song-list-wrapper">
+        <song-list :songs="songs"></song-list>
+      </div>
     </scroll>
   </div>
 </template>
@@ -21,6 +25,9 @@
 <script>
   import Scroll from '../../base/scroll/scroll'
   import SongList from '../../base/song-list/song-list'
+
+  const RESERVED_HEIGHT = 40;
+
   export default {
     name: "music-list",
     props: {
@@ -37,22 +44,56 @@
         default: ''
       }
     },
-    mounted(){
-      console.log(12222);
-      //this.$refs.list 对象
-      this.$refs.list.$el.style.top= `${this.$refs.bgImage.clientHeight}px`
+    data() {
+      return {
+        scrollY: 0
+      }
     },
-    components:{
+    mounted() {
+      // bglayer 的滚动量
+      this.imageHeight = this.$refs.bgImage.clientHeight;
+      this.minTransalteY = -this.imageHeight + RESERVED_HEIGHT;
+      //this.$refs.list dom对象$el, 计算列表到顶部距离
+      this.$refs.list.$el.style.top = `${this.imageHeight}px`
+    },
+    created() {
+      this.probeType = 3; // scroll 的滚动类型
+      this.listenScroll = true; // 监听滚动
+    },
+    components: {
       Scroll,
       SongList
     },
-    computed:{
-      bgStyle(){
-        console.log(111,this.bgImage);
-        console.log('title',this.title);
+    computed: {
+      bgStyle() {
         return `background-image:url(${this.bgImage});`
+      },
+    },
+    methods: {
+      //监听滚动
+      scroll(pos) {
+        this.scrollY = pos.y;
       }
     },
+    watch: {
+      scrollY(newY) {
+        console.log(122, newY);
+        //bglayer 滚动的范围
+        let translateY = Math.max(this.minTransalteY, newY);//最大滚动量
+        let zIndex = 0;
+        this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`;
+        this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`;
+        if (newY < this.minTransalteY) {
+          zIndex = 10;
+          this.$refs.bgImage.style.paddingTop = 0;
+          this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`;
+        } else {
+          this.$refs.bgImage.style.paddingTop = '70%';
+          this.$refs.bgImage.style.height = 0;
+        }
+        this.$refs.bgImage.style.zIndex = zIndex;
+      }
+    }
 
   }
 </script>
@@ -148,6 +189,7 @@
       top: 0
       bottom: 0
       width: 100%
+      /*overflow: hidden*/ // 上下拖动
       background: $color-background
 
       .song-list-wrapper

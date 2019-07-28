@@ -12,14 +12,14 @@ import {Base64} from 'js-base64'
 
 export default class Song {
   constructor ({id, mid, singer, name, album, duration, image, url}) {
-    this.id = id
-    this.mid = mid
-    this.singer = singer
-    this.name = name
-    this.album = album
-    this.duration = duration
+    this.url = url;
+    this.id = id;
+    this.mid = mid;
+    this.singer = singer;
+    this.name = name;
+    this.album = album;
+    this.duration = duration;
     this.image = image
-    this.url = url
   }
 
   getLyric () {
@@ -54,12 +54,12 @@ export function createSong (musicData) {
 }
 
 function filterSinger (singer) {
-  let ret = []
+  let ret = [];
   if (!singer) {
     return ''
   }
   singer.forEach(s => {
     ret.push(s.name)
-  })
+  });
   return ret.join('/')
 }
