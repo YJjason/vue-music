@@ -22,7 +22,7 @@
             @scroll="scroll"
             ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs" @select="selectItem"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -35,7 +35,9 @@
   import Scroll from '../../base/scroll/scroll'
   import SongList from '../../base/song-list/song-list'
   import {prefixStyle} from "../../common/js/dom";
-  import Loading from '../../base/loading/loading'
+  import Loading from '../../base/loading/loading';
+  import {mapActions} from  'vuex';
+
   const RESERVED_HEIGHT = 40;
 
   const transform =prefixStyle('transfrom');
@@ -91,7 +93,21 @@
       //返回
       back(){
         this.$router.back()
-      }
+      },
+      //点击播放
+      selectItem(item,index){
+        //调用selectPlay
+        this.selectPlay({
+          list:this.songs,
+          index
+
+        })
+      },
+
+      //mapAction 代理actions
+      ...mapActions([
+        'selectPlay'
+      ]),
     },
     watch: {
       scrollY(newY) {
