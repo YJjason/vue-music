@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div class="play"  ref="palyBtn" v-show="songs.length">
+        <div class="play"  ref="playBtn" v-show="songs.length">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -95,7 +95,6 @@
     },
     watch: {
       scrollY(newY) {
-        console.log(122, newY);
         //bglayer 滚动的范围
         let translateY = Math.max(this.minTransalteY, newY);//最大滚动量
         let zIndex = 0;
@@ -119,11 +118,11 @@
           zIndex = 10;
           this.$refs.bgImage.style.paddingTop = 0;
           this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`;
-          this.$refs.palyBtn.style.display='none';
+          this.$refs.playBtn.style.display='none';
         } else {
           this.$refs.bgImage.style.paddingTop = '70%';
           this.$refs.bgImage.style.height = 0;
-          this.$refs.palyBtn.style.display='block';
+          this.$refs.playBtn.style.display='block';
 
         }
         this.$refs.bgImage.style['transform'] = `scale(${scale})`;
