@@ -8,3 +8,8 @@ export const selectPlay=function ({commit, state}, {list, index}) {
   commit(types.SET_FULL_SCREEN,true); // 打开播放器
   commit(types.SET_PLAYING_STATE,true);
 };
+
+
+export const setSelectVkey = function ({commit,state},{obj}) {
+  commit(types.SET_SELECT_VKEY,obj)
+}

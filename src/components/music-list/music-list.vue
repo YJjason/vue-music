@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div class="play"  ref="playBtn" v-show="songs.length">
+        <div class="play" ref="playBtn" v-show="songs.length">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -36,11 +36,12 @@
   import SongList from '../../base/song-list/song-list'
   import {prefixStyle} from "../../common/js/dom";
   import Loading from '../../base/loading/loading';
-  import {mapActions} from  'vuex';
+  import getSongVkey from '../../api/get_song_vkey'
+  import {mapActions} from 'vuex';
 
   const RESERVED_HEIGHT = 40;
 
-  const transform =prefixStyle('transfrom');
+  const transform = prefixStyle('transfrom');
   const backdrop = prefixStyle('backdrop-filter');
 
   export default {
@@ -91,22 +92,38 @@
         this.scrollY = pos.y;
       },
       //返回
-      back(){
+      back() {
         this.$router.back()
       },
       //点击播放
-      selectItem(item,index){
+      selectItem(item, index) {
+        getSongVkey(item.mid).then(res => {
+          if (res.code == 0) {
+            let vkey = res.data.items[0].vkey
+            let targetSong = {
+              id: item.id,
+              url: `http://dl.stream.qqmusic.qq.com/C400${item.mid}.m4a?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
+            }
+              this.setSelectVkey({
+                obj:targetSong
+              })
+            //修改 歌曲的播放地址
+            this.$emit('selectSong', targetSong)
+          }
+        })
+
         //调用selectPlay
         this.selectPlay({
-          list:this.songs,
+          list: this.songs,
           index
-
         })
+
       },
 
       //mapAction 代理actions
       ...mapActions([
-        'selectPlay'
+        'selectPlay',
+        'setSelectVkey'
       ]),
     },
     watch: {
@@ -115,7 +132,7 @@
         let translateY = Math.max(this.minTransalteY, newY);//最大滚动量
         let zIndex = 0;
         let scale = 1;
-        let blur=0;
+        let blur = 0;
         this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`;
         this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`;
 
@@ -123,22 +140,22 @@
         const percent = Math.abs(newY / this.imageHeight);
         if (newY > 0) {
           scale = 1 + percent;
-          zIndex=10;
-        }else {
-          blur=Math.min(20*percent,20) //图片模糊度
+          zIndex = 10;
+        } else {
+          blur = Math.min(20 * percent, 20) //图片模糊度
         }
         //ios 高斯模糊，渐进增强
-        this.$refs.filter.style['backdrop-filter']=`blur(${blur})px`;
-        this.$refs.filter.style['webkitBackdrop-filter']=`blur(${blur})px`;
+        this.$refs.filter.style['backdrop-filter'] = `blur(${blur})px`;
+        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur})px`;
         if (newY < this.minTransalteY) {
           zIndex = 10;
           this.$refs.bgImage.style.paddingTop = 0;
           this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`;
-          this.$refs.playBtn.style.display='none';
+          this.$refs.playBtn.style.display = 'none';
         } else {
           this.$refs.bgImage.style.paddingTop = '70%';
           this.$refs.bgImage.style.height = 0;
-          this.$refs.playBtn.style.display='block';
+          this.$refs.playBtn.style.display = 'block';
 
         }
         this.$refs.bgImage.style['transform'] = `scale(${scale})`;

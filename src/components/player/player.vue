@@ -16,7 +16,7 @@
 
         </div>
         <div class="middle">
-          <div class="middle-l">
+          <div class="middle-l" ref="cdWrapper">
             <div class="cd-wrapper">
               <div class="cd">
                 <img :src="currentSong.image" alt="" class="image">
@@ -49,7 +49,7 @@
       <!--      mini player-->
       <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-          <img src="" alt="" width="40" height="40">
+          <img :src="currentSong.image" alt="" width="40" height="40">
         </div>
         <div class="text">
           <h2 class="nam" v-html="currentSong.name"></h2>
@@ -66,6 +66,7 @@
 
 <script>
   import {mapGetters, mapMutations} from 'vuex';
+  import animations from 'create-keyframe-animation'
 
   export default {
     name: "player",
@@ -87,6 +88,61 @@
       // 全屏播放器
       open() {
         this.setFullScreen(true)
+      },
+      // js 动态创建 keyframe 动画  create-keyframe-animation
+      enter(el, done) {
+        const {x, y, scale} = this._getPosAndScale()
+        let animation = {
+          0: {
+            transform: `tanslate3d(${x}px,${y}px,0) scale(${scale})`
+          },
+          60: {
+            transform: `tanslate3d(0,0,0) scale(1.1)`
+          },
+          100: {
+            transform: `translate3d(0,0,0) scale(1)`
+          }
+        }
+        animations.registerAnimation({
+          name: 'move',
+          animation,
+          presets: {
+            duration: 400,
+            easing: 'linear'
+          }
+        })
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+      },
+      afterEnter() {
+        animations.unregisterAnimation('move')
+        this.$refs.cdWrapper.style.animation = ''
+
+      },
+      leave(el, done) {
+        this.$refs.cdWrapper.style.animation = 'all .4'
+        const {x, y, scale} = this._getPosAndScale()
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+        this.$refs.cdWrapper.addEventListener('transitioned', done)
+      },
+      afterLeave(el, done) {
+        this.$refs.cdWrapper.style.transform = ''
+        this.$refs.cdWrapper.style[transform] = ''
+      },
+      //初始mimi player 图片位置和缩放比
+      _getPosAndScale() {
+        let targetWidth = 40;
+        let paddingLeft = 40;
+        let paddingBottom = 30;
+        let paddingTop = 80;
+        let width = window.innerWidth * 0.8
+        let scale = targetWidth / width  //缩放比
+        let x = -(window.innerWidth / 2 - paddingLeft)
+        let y = window.innerWidth - paddingTop - width / 2 - paddingBottom
+        return {
+          x,
+          y,
+          scale
+        }
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN'

@@ -21,6 +21,13 @@ const mutations = {
   },
   [types.SET_CURRENT_INDEX](state, index) {
     state.currentIndex = index
+  },
+  [types.SET_SELECT_VKEY](state,obj){
+    state.playlist.filter(item=>{
+      if(item.id==obj.id){
+        item.url = obj.url
+      }
+    })
   }
 
 };
