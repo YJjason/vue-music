@@ -2,6 +2,7 @@ import {commonParam} from './config'
 import axios from 'axios'
 
 export function getLyric(mid) {
+  console.log('mid',mid)
   const url = '/api/lyric'
 
   const data = Object.assign({}, commonParam, {
@@ -13,10 +14,10 @@ export function getLyric(mid) {
     pcachetime: +new Date(),
     format: 'json'
   })
-
   return axios.get(url, {
     params: data
   }).then((res) => {
+
     return Promise.resolve(res.data)
   })
 }

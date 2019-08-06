@@ -54,9 +54,9 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       poll: config.dev.poll,
     },
 
-    /*获取歌单列表*/
 
     before(app) {
+      /*获取歌单列表*/
       app.get('/api/getDiscList', (req, res) => {
         var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
         // var url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
@@ -73,9 +73,31 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           console.log(error)
         })
       })
+      /*获取歌单列表*/
+      /*获取歌词*/
+      app.get('/api/lyric', (req, res) => {
+        let url = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg";
+        axios.get(url, {
+          headers: {
+            Referer: 'https://y.qq.com/portal/player.html',
+          },
+          params: req.query
+        }).then(response => {
+          var ret = response.data
+          if (typeof ret == 'string') {
+            var reg = /^\w+\(({[^()]+})\)$/
+            var matches = ret.match(reg)
+            if (matches) {
+              ret = JSON.parse(matches[1])
+            }
+          }
+          res.json(ret)
+        }).catch(e => {
+          console.log(e)
+        })
+      })
     }
 
-    /*获取歌单列表*/
   },
   plugins: [
     new webpack.DefinePlugin({

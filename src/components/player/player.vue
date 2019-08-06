@@ -5,7 +5,6 @@
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img :src="currentSong.image" alt="" width="100%" height="100%">
-
         </div>
         <div class="top">
           <div class="back" @click="back">
@@ -22,7 +21,23 @@
                 <img :src="currentSong.image" alt="" class="image">
               </div>
             </div>
+            <div class="playing-lyric-wrapper">
+              <div class="playing-lyric">{{this.playingLyric}}</div>
+            </div>
           </div>
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+            <div class="lyric-wrapper">
+              <div v-if="currentLyric">
+                <p ref="lyricLine"
+                   class="text"
+                   :class="{'current':currentLineNum==index}"
+                   v-for="(item,index) in currentLyric.lines"
+                >
+                  {{item.txt}}
+                </p>
+              </div>
+            </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="operators">
@@ -36,7 +51,7 @@
               <i class="icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i @click="togglePlaying" :class="playIcon"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-not-favorite"></i>
@@ -47,18 +62,21 @@
     </transition>
     <transition name="mini">
       <!--      mini player-->
-      <div class="mini-player" v-show="!fullScreen" @click="open">
-        <div class="icon">
-          <img :src="currentSong.image" alt="" width="40" height="40">
+      <div>
+        <div class="mini-player" v-show="!fullScreen" @click="open">
+          <div class="icon">
+            <img :src="currentSong.image" alt="" width="40" height="40">
+          </div>
+          <div class="text">
+            <h2 class="nam" v-html="currentSong.name"></h2>
+            <p class="desc" v-html="currentSong.singer"></p>
+          </div>
+          <div class="control"></div>
+          <div class="control">
+            <i class="icon-playlist"></i>
+          </div>
         </div>
-        <div class="text">
-          <h2 class="nam" v-html="currentSong.name"></h2>
-          <p class="desc" v-html="currentSong.singer"></p>
-        </div>
-        <div class="control"></div>
-        <div class="control">
-          <i class="icon-playlist"></i>
-        </div>
+        <audio ref="audio" :src="currentSong.url"></audio>
       </div>
     </transition>
   </div>
@@ -67,19 +85,35 @@
 <script>
   import {mapGetters, mapMutations} from 'vuex';
   import animations from 'create-keyframe-animation'
+  import Scroll from '../../base/scroll/scroll'
+  import Lyric from 'lyric-parser'
 
   export default {
     name: "player",
     data() {
-      return {}
+      return {
+        currentLyric: null,
+        currentLineNum: 0,
+        playingLyric:''
+      }
+
+    },
+    components: {
+      Scroll
     },
     computed: {
       ...mapGetters([
         'fullScreen',
         'playlist',
-        'currentSong'
-      ])
+        'currentSong',
+        'playing'
+      ]),
+      playIcon() {
+        return this.playing ? 'icon-pause' : 'icon-play'
+      }
+
     },
+
     methods: {
       //缩小播放器，mini播放器
       back() {
@@ -128,6 +162,34 @@
         this.$refs.cdWrapper.style.transform = ''
         this.$refs.cdWrapper.style[transform] = ''
       },
+      //播放器控制
+      togglePlaying(e) {
+        e.preventDefault()
+        this.setPlayingState(!this.playing)
+      },
+      //获取歌词
+      getLyric() {
+        this.currentSong.getLyric().then(res => {
+          this.currentLyric = new Lyric(res, this.handleLyric)
+          if(this.playing){
+            this.currentLyric.play()
+          }
+        }).catch(()=>{
+          this.currentLyric=null;
+          this.playingLyric='';
+          this.currentLineNum=0
+        })
+      },
+      handleLyric({lineNum, txt}) {
+        this.currentLineNum = lineNum
+        if (lineNum > 5) {
+          let lineEl = this.$refs.lyricLine[lineNum - 5]
+          this.$refs.lyricList.scrollToElement(lineEl,1000)
+        }else{
+          this.$refs.lyricList.scrollTo(0,0,1000)
+        }
+        this.playingLyric = txt
+      },
       //初始mimi player 图片位置和缩放比
       _getPosAndScale() {
         let targetWidth = 40;
@@ -145,8 +207,24 @@
         }
       },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN'
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlayingState: 'SET_PLAYING_STATE'
       })
+    },
+    watch: {
+      currentSong(newSong, oldSong) {
+        clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          this.$refs.audio.play()
+          this.getLyric()
+        }, 1000)
+      },
+      playing(newPlaying) {
+        let audio = this.$refs.audio
+        this.$nextTick(() => {
+          newPlaying ? audio.play() : audio.pause()
+        })
+      }
     }
   }
 </script>

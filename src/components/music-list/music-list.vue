@@ -98,18 +98,30 @@
       //点击播放
       selectItem(item, index) {
         getSongVkey(item.mid).then(res => {
+          console.log(122, res)
+          let targetSong = null
           if (res.code == 0) {
             let vkey = res.data.items[0].vkey
-            let targetSong = {
-              id: item.id,
-              url: `http://dl.stream.qqmusic.qq.com/C400${item.mid}.m4a?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
+            let filename = res.data.items[0].filename
+            if (vkey) {
+              targetSong = {
+                id: item.id,
+                url: `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
+              }
+            } else {
+              alert('该歌曲已下架')
+              return
+              targetSong = {
+                id: item.id,
+                url: ''
+              }
             }
-              this.setSelectVkey({
-                obj:targetSong
-              })
-            //修改 歌曲的播放地址
-            this.$emit('selectSong', targetSong)
           }
+          this.setSelectVkey({
+            obj: targetSong
+          })
+          //修改 歌曲的播放地址
+          this.$emit('selectSong', targetSong)
         })
 
         //调用selectPlay
