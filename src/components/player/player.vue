@@ -30,7 +30,7 @@
               <div v-if="currentLyric">
                 <p ref="lyricLine"
                    class="text"
-                   :class="{'current':currentLineNum==index}"
+                   :class="{'current':currentLineNum===index}"
                    v-for="(item,index) in currentLyric.lines"
                 >
                   {{item.txt}}
@@ -40,18 +40,25 @@
           </scroll>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{this.currentTime}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar></progress-bar>
+            </div>
+            <span class="time time-r">{{this.currentTime}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon-sequence"></i>
+            <div class="icon i-left" :class="disableCls">
+              <i class="icon-prev" @click="prev"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon-prev"></i>
-            </div>
-            <div class="icon i-center">
+            <div class="icon i-center" :class="disableCls">
               <i @click="togglePlaying" :class="playIcon"></i>
+            </div>
+            <div class="icon i-right" :class="disableCls ">
+              <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-not-favorite"></i>
@@ -65,28 +72,32 @@
       <div>
         <div class="mini-player" v-show="!fullScreen" @click="open">
           <div class="icon">
-            <img :src="currentSong.image" alt="" width="40" height="40">
+            <img  :class="cdCls" :src="currentSong.image" alt="" width="40" height="40">
           </div>
           <div class="text">
             <h2 class="nam" v-html="currentSong.name"></h2>
             <p class="desc" v-html="currentSong.singer"></p>
           </div>
-          <div class="control"></div>
+          <div class="control">
+            <i @click.stop="togglePlaying" :class="miniIcon"></i>
+          </div>
           <div class="control">
             <i class="icon-playlist"></i>
           </div>
         </div>
-        <audio ref="audio" :src="currentSong.url"></audio>
+        <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
       </div>
     </transition>
   </div>
 </template>
 
 <script>
-  import {mapGetters, mapMutations} from 'vuex';
-  import animations from 'create-keyframe-animation'
-  import Scroll from '../../base/scroll/scroll'
-  import Lyric from 'lyric-parser'
+  import {mapGetters, mapMutations,mapActions} from 'vuex';
+  import animations from 'create-keyframe-animation';
+  import Scroll from '../../base/scroll/scroll';
+  import Lyric from 'lyric-parser';
+  import getSongVkey from '../../api/get_song_vkey';
+  import ProgressBar from '../../base/progress-bar/progress-bar'
 
   export default {
     name: "player",
@@ -94,25 +105,38 @@
       return {
         currentLyric: null,
         currentLineNum: 0,
-        playingLyric:''
+        playingLyric:'',
+        songReady:false,
+        currentTime:0
       }
 
     },
     components: {
-      Scroll
+      Scroll,
+      ProgressBar
     },
     computed: {
       ...mapGetters([
         'fullScreen',
         'playlist',
         'currentSong',
-        'playing'
+        'playing',
+        'currentIndex'
       ]),
       playIcon() {
         return this.playing ? 'icon-pause' : 'icon-play'
+      },
+      cdCls(){
+        return this.playing ? 'play':'play pause'
+      },
+      miniIcon(){
+        return this.playing ? 'icon-pause-mini':'icon-play-mini'
+      },
+      disableCls(){
+        return this.songReady?'':'disable'
       }
-
     },
+
 
     methods: {
       //缩小播放器，mini播放器
@@ -125,7 +149,7 @@
       },
       // js 动态创建 keyframe 动画  create-keyframe-animation
       enter(el, done) {
-        const {x, y, scale} = this._getPosAndScale()
+        const {x, y, scale} = this._getPosAndScale();
         let animation = {
           0: {
             transform: `tanslate3d(${x}px,${y}px,0) scale(${scale})`
@@ -136,7 +160,7 @@
           100: {
             transform: `translate3d(0,0,0) scale(1)`
           }
-        }
+        };
         animations.registerAnimation({
           name: 'move',
           animation,
@@ -144,33 +168,33 @@
             duration: 400,
             easing: 'linear'
           }
-        })
+        });
         animations.runAnimation(this.$refs.cdWrapper, 'move', done)
       },
       afterEnter() {
-        animations.unregisterAnimation('move')
+        animations.unregisterAnimation('move');
         this.$refs.cdWrapper.style.animation = ''
 
       },
       leave(el, done) {
-        this.$refs.cdWrapper.style.animation = 'all .4'
-        const {x, y, scale} = this._getPosAndScale()
-        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`
+        this.$refs.cdWrapper.style.animation = 'all .4';
+        const {x, y, scale} = this._getPosAndScale();
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`;
         this.$refs.cdWrapper.addEventListener('transitioned', done)
       },
       afterLeave(el, done) {
-        this.$refs.cdWrapper.style.transform = ''
+        this.$refs.cdWrapper.style.transform = '';
         this.$refs.cdWrapper.style[transform] = ''
       },
       //播放器控制
       togglePlaying(e) {
-        e.preventDefault()
+        e.preventDefault();
         this.setPlayingState(!this.playing)
       },
       //获取歌词
       getLyric() {
         this.currentSong.getLyric().then(res => {
-          this.currentLyric = new Lyric(res, this.handleLyric)
+          this.currentLyric = new Lyric(res, this.handleLyric);
           if(this.playing){
             this.currentLyric.play()
           }
@@ -183,13 +207,84 @@
       handleLyric({lineNum, txt}) {
         this.currentLineNum = lineNum
         if (lineNum > 5) {
-          let lineEl = this.$refs.lyricLine[lineNum - 5]
+          let lineEl = this.$refs.lyricLine[lineNum - 5];
           this.$refs.lyricList.scrollToElement(lineEl,1000)
         }else{
           this.$refs.lyricList.scrollTo(0,0,1000)
         }
         this.playingLyric = txt
       },
+      prev(){
+        // 判断 audio 是否已经ready
+        if(!this.songReady){
+          return
+        }
+        let index = this.currentIndex-1;
+        if(index===-1){
+          index = this.playlist.length-1
+        }
+        this.setCurrentIndex(index);
+        this._getSongPlay();
+        if(!this.playing){
+          this.togglePlaying()
+        }
+        this.songReady=false
+
+      },
+      next(){
+        if(!this.songReady){
+          return
+        }
+        let index = this.currentIndex+1;
+        if(index === this.playlist.length){
+          index=0
+        }
+        this.setCurrentIndex(index);
+        this._getSongPlay();
+        if(!this.playing){
+          this.togglePlaying()
+        }
+        this.songReady=false
+      },
+      ready(){
+        this.songReady=true
+      },
+      error(){
+        this.songReady=true
+
+      },
+      //获取歌曲播放地址
+      _getSongPlay(){
+       getSongVkey(this.currentSong.mid).then(res=>{
+         let targetSong = null;
+         if (res.code === 0) {
+           let vkey = res.data.items[0].vkey;
+           let filename = res.data.items[0].filename;
+           if (vkey) {
+             targetSong = {
+               id: this.currentSong.id,
+               url: `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
+             }
+           } else {
+             targetSong = {
+               id: this.currentSong.id,
+               url: ''
+             };
+             alert('该歌曲已下架');
+             return
+           }
+         }
+         this.setSelectVkey({
+           obj: targetSong
+         });
+         //修改 歌曲的播放地址
+         // this.$emit('selectSong', targetSong)
+       })
+      },
+      ...mapActions([
+        'setSelectVkey'
+      ]),
+
       //初始mimi player 图片位置和缩放比
       _getPosAndScale() {
         let targetWidth = 40;
@@ -208,24 +303,24 @@
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlayingState: 'SET_PLAYING_STATE'
+        setPlayingState: 'SET_PLAYING_STATE',
+        setCurrentIndex:'SET_CURRENT_INDEX'
       })
     },
     watch: {
       currentSong(newSong, oldSong) {
-        clearTimeout(this.timer)
+        clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-          this.$refs.audio.play()
+          this.$refs.audio.play();
           this.getLyric()
         }, 1000)
       },
       playing(newPlaying) {
-
-        let audio = this.$refs.audio
+        let audio = this.$refs.audio;
         this.$nextTick(() => {
           newPlaying ? audio.play() : audio.pause()
         })
-      }
+      },
     }
   }
 </script>
