@@ -41,11 +41,11 @@
         </div>
         <div class="bottom">
           <div class="progress-wrapper">
-            <span class="time time-l">{{this.currentTime}}</span>
+            <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar></progress-bar>
+              <progress-bar :precent="precent"></progress-bar>
             </div>
-            <span class="time time-r">{{this.currentTime}}</span>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
             <div class="icon i-left">
@@ -72,7 +72,7 @@
       <div>
         <div class="mini-player" v-show="!fullScreen" @click="open">
           <div class="icon">
-            <img  :class="cdCls" :src="currentSong.image" alt="" width="40" height="40">
+            <img :class="cdCls" :src="currentSong.image" alt="" width="40" height="40">
           </div>
           <div class="text">
             <h2 class="nam" v-html="currentSong.name"></h2>
@@ -85,14 +85,17 @@
             <i class="icon-playlist"></i>
           </div>
         </div>
-        <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
+        <audio ref="audio" :src="currentSong.url"
+               @canplay="ready" @error="error"
+               @timeupdate="updateTime"
+        ></audio>
       </div>
     </transition>
   </div>
 </template>
 
 <script>
-  import {mapGetters, mapMutations,mapActions} from 'vuex';
+  import {mapGetters, mapMutations, mapActions} from 'vuex';
   import animations from 'create-keyframe-animation';
   import Scroll from '../../base/scroll/scroll';
   import Lyric from 'lyric-parser';
@@ -105,9 +108,9 @@
       return {
         currentLyric: null,
         currentLineNum: 0,
-        playingLyric:'',
-        songReady:false,
-        currentTime:0
+        playingLyric: '',
+        songReady: false,
+        currentTime: 0
       }
 
     },
@@ -116,6 +119,21 @@
       ProgressBar
     },
     computed: {
+      precent(){
+        return this.currentTime / this.currentSong.duration
+      },
+      playIcon() {
+        return this.playing ? 'icon-pause' : 'icon-play'
+      },
+      cdCls() {
+        return this.playing ? 'play' : 'play pause'
+      },
+      miniIcon() {
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
+      disableCls() {
+        return this.songReady ? '' : 'disable'
+      },
       ...mapGetters([
         'fullScreen',
         'playlist',
@@ -123,18 +141,7 @@
         'playing',
         'currentIndex'
       ]),
-      playIcon() {
-        return this.playing ? 'icon-pause' : 'icon-play'
-      },
-      cdCls(){
-        return this.playing ? 'play':'play pause'
-      },
-      miniIcon(){
-        return this.playing ? 'icon-pause-mini':'icon-play-mini'
-      },
-      disableCls(){
-        return this.songReady?'':'disable'
-      }
+
     },
 
 
@@ -195,91 +202,108 @@
       getLyric() {
         this.currentSong.getLyric().then(res => {
           this.currentLyric = new Lyric(res, this.handleLyric);
-          if(this.playing){
+          if (this.playing) {
             this.currentLyric.play()
           }
-        }).catch(()=>{
-          this.currentLyric=null;
-          this.playingLyric='';
-          this.currentLineNum=0
+        }).catch(() => {
+          this.currentLyric = null;
+          this.playingLyric = '';
+          this.currentLineNum = 0
         })
       },
       handleLyric({lineNum, txt}) {
         this.currentLineNum = lineNum
         if (lineNum > 5) {
           let lineEl = this.$refs.lyricLine[lineNum - 5];
-          this.$refs.lyricList.scrollToElement(lineEl,1000)
-        }else{
-          this.$refs.lyricList.scrollTo(0,0,1000)
+          this.$refs.lyricList.scrollToElement(lineEl, 1000)
+        } else {
+          this.$refs.lyricList.scrollTo(0, 0, 1000)
         }
         this.playingLyric = txt
       },
-      prev(){
+      prev() {
         // 判断 audio 是否已经ready
-        if(!this.songReady){
+        if (!this.songReady) {
           return
         }
-        let index = this.currentIndex-1;
-        if(index===-1){
-          index = this.playlist.length-1
+        let index = this.currentIndex - 1;
+        if (index === -1) {
+          index = this.playlist.length - 1
         }
         this.setCurrentIndex(index);
         this._getSongPlay();
-        if(!this.playing){
+        if (!this.playing) {
           this.togglePlaying()
         }
-        this.songReady=false
+        this.songReady = false
 
       },
-      next(){
-        if(!this.songReady){
+      next() {
+        if (!this.songReady) {
           return
         }
-        let index = this.currentIndex+1;
-        if(index === this.playlist.length){
-          index=0
+        let index = this.currentIndex + 1;
+        if (index === this.playlist.length) {
+          index = 0
         }
         this.setCurrentIndex(index);
         this._getSongPlay();
-        if(!this.playing){
+        if (!this.playing) {
           this.togglePlaying()
         }
-        this.songReady=false
+        this.songReady = false
       },
-      ready(){
-        this.songReady=true
+      ready() {
+        this.songReady = true
       },
-      error(){
-        this.songReady=true
+      error() {
+        this.songReady = true
+      },
+      updateTime(e){
+          this.currentTime=e.target.currentTime
+      },
+      format(interval) {
+        interval = interval | 0
+        const minute = interval / 60 | 0
+        const second = this._pad(interval % 60)
+        return `${minute}:${second}`
+      },
+      _pad(num, n = 2) {
+        let len = num.toString().length
+        while (len < n) {
+          num = '0' + num
+          len++
+        }
+        return num
 
       },
       //获取歌曲播放地址
-      _getSongPlay(){
-       getSongVkey(this.currentSong.mid).then(res=>{
-         let targetSong = null;
-         if (res.code === 0) {
-           let vkey = res.data.items[0].vkey;
-           let filename = res.data.items[0].filename;
-           if (vkey) {
-             targetSong = {
-               id: this.currentSong.id,
-               url: `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
-             }
-           } else {
-             targetSong = {
-               id: this.currentSong.id,
-               url: ''
-             };
-             alert('该歌曲已下架');
-             return
-           }
-         }
-         this.setSelectVkey({
-           obj: targetSong
-         });
-         //修改 歌曲的播放地址
-         // this.$emit('selectSong', targetSong)
-       })
+      _getSongPlay() {
+        getSongVkey(this.currentSong.mid).then(res => {
+          let targetSong = null;
+          if (res.code === 0) {
+            let vkey = res.data.items[0].vkey;
+            let filename = res.data.items[0].filename;
+            if (vkey) {
+              targetSong = {
+                id: this.currentSong.id,
+                url: `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
+              }
+            } else {
+              targetSong = {
+                id: this.currentSong.id,
+                url: ''
+              };
+              alert('该歌曲已下架');
+              return
+            }
+          }
+          this.setSelectVkey({
+            obj: targetSong
+          });
+          //修改 歌曲的播放地址
+          // this.$emit('selectSong', targetSong)
+        })
       },
       ...mapActions([
         'setSelectVkey'
@@ -304,7 +328,7 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIndex:'SET_CURRENT_INDEX'
+        setCurrentIndex: 'SET_CURRENT_INDEX'
       })
     },
     watch: {

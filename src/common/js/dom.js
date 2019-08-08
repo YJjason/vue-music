@@ -28,7 +28,7 @@ export function getData (el, name, val) {
   const prefix = 'data-';
   name = prefix + name;
   if (val) {
-    return el.setAtrribute(name, val)
+    return el.setAttribute(name, val)
   } else {
     return el.getAttribute(name)
   }
@@ -53,7 +53,7 @@ let vendor=(()=>{
   return false
 })();
 
-export  function prefixStyle(style) {
+/*export  function prefixStyle(style) {
   if(vendor===false){
     return false
   }
@@ -61,4 +61,16 @@ export  function prefixStyle(style) {
     return style
   }
   return  vendor+style.charAt(0).toLocaleUpperCase()+style.charAt(1)
+}*/
+
+export function prefixStyle(style) {
+  if (vendor === false) {
+    return false
+  }
+
+  if (vendor === 'standard') {
+    return style
+  }
+
+  return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }

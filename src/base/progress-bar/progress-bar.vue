@@ -1,41 +1,66 @@
 <template>
-    <div class="progress-bar">
-      <div class="bar-inner">
-            <div class="progress">
-
-            </div>
-        <div class="progress-btn-wrapper">
-          <div class="progress-btn"></div>
-        </div>
+  <div class="progress-bar" ref="progressBar">
+    <div class="bar-inner">
+      <div class="progress" ref="progress"></div>
+      <div class="progress-btn-wrapper" ref="progressBtn">
+        <div class="progress-btn"></div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
-    export default {
-        name: "progress-bar"
+  import {prefixStyle} from "../../common/js/dom";
+
+  const transform = prefixStyle('transform')
+
+  const progressBtnWidth = 16
+  export default {
+    name: "progress-bar",
+    props: {
+      precent: {
+        type: Number,
+        default: 0
+      }
+    },
+    watch: {
+      precent(newPrecent) {
+        if (newPrecent) {
+          const barWidth = this.$refs.progressBar.clientWidth - 16;
+          const offsetWidth = newPrecent * barWidth
+          this.$refs.progress.style.width = `${offsetWidth}px`
+          this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`
+        }
+      }
     }
+
+
+  }
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "../../common/stylus/variable.styl";
   .progress-bar
     height: 30px
+
     .bar-inner
       position: relative
       top: 13px
       height: 4px
       background: rgba(0, 0, 0, 0.3)
+
       .progress
         position: absolute
         height: 100%
         background: $color-theme
+
       .progress-btn-wrapper
         position: absolute
         left: -8px
         top: -13px
         width: 30px
         height: 30px
+
         .progress-btn
           position: relative
           top: 7px
