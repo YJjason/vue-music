@@ -220,6 +220,7 @@
         }, 1000)
       },
       playing(newPlaying) {
+
         let audio = this.$refs.audio
         this.$nextTick(() => {
           newPlaying ? audio.play() : audio.pause()
