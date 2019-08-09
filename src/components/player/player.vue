@@ -43,7 +43,7 @@
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :precent="precent"></progress-bar>
+              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
@@ -119,7 +119,7 @@
       ProgressBar
     },
     computed: {
-      precent(){
+      percent() {
         return this.currentTime / this.currentSong.duration
       },
       playIcon() {
@@ -259,19 +259,28 @@
       error() {
         this.songReady = true
       },
-      updateTime(e){
-          this.currentTime=e.target.currentTime
+      updateTime(e) {
+        this.currentTime = e.target.currentTime
       },
       format(interval) {
-        interval = interval | 0
-        const minute = interval / 60 | 0
-        const second = this._pad(interval % 60)
+        interval = interval | 0;
+        const minute = interval / 60 | 0;
+        const second = this._pad(interval % 60);
         return `${minute}:${second}`
       },
+      // 处理progress-bar 派发的事件，重新定位滑块位置
+      onProgressBarChange(percent) {
+        // this.$refs.audio.currentTime = this.currentSong.duration * percent ;// 获取到此时位置
+        const currentTime = this.currentSong.duration * percent;
+        this.$refs.audio.currentTime = currentTime;
+        if(!this.playing){
+          this.togglePlaying()
+        }
+      },
       _pad(num, n = 2) {
-        let len = num.toString().length
+        let len = num.toString().length;
         while (len < n) {
-          num = '0' + num
+          num = '0' + num;
           len++
         }
         return num

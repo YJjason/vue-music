@@ -1,8 +1,12 @@
 <template>
-  <div class="progress-bar" ref="progressBar">
+  <div class="progress-bar" ref="progressBar" @click="progressClick">
     <div class="bar-inner">
       <div class="progress" ref="progress"></div>
-      <div class="progress-btn-wrapper" ref="progressBtn">
+      <div class="progress-btn-wrapper"
+           ref="progressBtn"
+           @touchstart.prevent="progressTouchStart"
+           @touchmove.prevent="progressTouchMove"
+           @touchend.prevent="progressTouchEnd">
         <div class="progress-btn"></div>
       </div>
     </div>
@@ -12,24 +16,69 @@
 <script>
   import {prefixStyle} from "../../common/js/dom";
 
-  const transform = prefixStyle('transform')
+  const transform = prefixStyle('transform');
 
-  const progressBtnWidth = 16
+  const progressBtnWidth = 16; // 进度条滑块的宽度
+
   export default {
     name: "progress-bar",
     props: {
-      precent: {
+      percent: {
         type: Number,
         default: 0
       }
     },
+    created(){
+      this.touch={}
+    },
+    methods:{
+      progressTouchStart(e){
+        console.log(23,e)
+        this.touch.initiated=true;
+        this.touch.startX = e.touches[0].pageX;
+        this.touch.left = this.$refs.progress.clientWidth;
+
+      },
+      progressTouchMove(e){
+        if(!this.touch.initiated){
+          return
+        }
+        const deltaX = e.touches[0].pageX-this.touch.startX;
+        const offsetWidth =Math.min(this.$refs.progressBar.clientWidth-progressBtnWidth,  Math.max(0,this.touch.left + deltaX));  // 防止进度条超出 progress bar
+
+        this._offset(offsetWidth )
+      },
+      progressTouchEnd(e){
+          this.touch.initiated=false;
+        //派发事件
+        this._triggerPercent()
+
+      },
+      //点击滑块
+      progressClick(e){
+        this._offset(e.offsetX);
+        this._triggerPercent()
+      },
+      //拖动滑块之后 滑块位置
+      _triggerPercent(){
+        const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
+        const percent = this.$refs.progress.clientWidth / barWidth;
+         this.$emit('percentChange',percent)
+      },
+      _offset(offsetWidth){
+        this.$refs.progress.style.width = `${offsetWidth}px`;
+        this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`;
+      }
+
+    },
     watch: {
-      precent(newPrecent) {
-        if (newPrecent) {
-          const barWidth = this.$refs.progressBar.clientWidth - 16;
-          const offsetWidth = newPrecent * barWidth
-          this.$refs.progress.style.width = `${offsetWidth}px`
-          this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`
+      percent(newPercent) {
+        if (newPercent  && !this.touch.initiated) { // 满足不再拖动时
+          const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
+          const offsetWidth = newPercent * barWidth;
+          this._offset(offsetWidth)
+         /* this.$refs.progress.style.width = `${offsetWidth}px`;
+          this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`;*/
         }
       }
     }
