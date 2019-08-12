@@ -23,11 +23,11 @@
     },
     data() {
       return {
-        dashArray: Math.PI * 100
+        dashArray: Math.PI * 100  //圆周长
       }
     },
     computed: {
-      dashOffset() {
+      dashOffset() {   // 偏移量
         return (1 - this.percent) * this.dashArray
       }
     }
@@ -35,7 +35,7 @@
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
+  @import "../../common/stylus/variable"
 
   .progress-circle
     position: relative

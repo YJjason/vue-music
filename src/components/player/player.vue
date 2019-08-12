@@ -48,8 +48,8 @@
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon i-left">
-              <i class="icon-sequence"></i>
+            <div class="icon i-left" @click="changeMode">
+              <i :class="iconMode"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
               <i class="icon-prev" @click="prev"></i>
@@ -79,7 +79,9 @@
             <p class="desc" v-html="currentSong.singer"></p>
           </div>
           <div class="control">
-            <i @click.stop="togglePlaying" :class="miniIcon"></i>
+            <progress-circle :radius='radius' :percent="percent">
+              <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
+            </progress-circle>
           </div>
           <div class="control">
             <i class="icon-playlist"></i>
@@ -101,6 +103,9 @@
   import Lyric from 'lyric-parser';
   import getSongVkey from '../../api/get_song_vkey';
   import ProgressBar from '../../base/progress-bar/progress-bar'
+  import ProgressCircle from '../../base/progress-circle/progress-circle'
+  import {playMode} from '../../common/js/config'
+  import {shuffle} from '../../common/js/util'
 
   export default {
     name: "player",
@@ -110,13 +115,15 @@
         currentLineNum: 0,
         playingLyric: '',
         songReady: false,
-        currentTime: 0
+        currentTime: 0,
+        radius: 32
       }
 
     },
     components: {
       Scroll,
-      ProgressBar
+      ProgressBar,
+      ProgressCircle
     },
     computed: {
       percent() {
@@ -134,18 +141,47 @@
       disableCls() {
         return this.songReady ? '' : 'disable'
       },
+      iconMode() {
+        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+      },
       ...mapGetters([
         'fullScreen',
         'playlist',
         'currentSong',
         'playing',
-        'currentIndex'
+        'currentIndex',
+        'mode',
+        'sequence'
       ]),
 
     },
 
 
     methods: {
+      //改变播放模式
+      changeMode() {
+        const mode = (this.mode + 1) % 3;
+        //触发mutation 修改state 值
+        this.setMode(mode)
+        //根据mode 重新赋值播放列表
+        let list = null
+        if (mode == playMode.random) {
+          //重新洗牌数据
+          list = shuffle(this.sequenceList)
+        } else {
+          list = this.sequenceList
+        }
+        console.log(122,list)
+        //切换播放模式，不改变当前播放
+        this.resetCurrentIndex(list)
+        this.setPlayList(list)
+      },
+      resetCurrentIndex(list) {
+        let index = list.filter(item => {
+          return item.id === this.currentSong.id;
+        })
+        this.setCurrentIndex(index)
+      },
       //缩小播放器，mini播放器
       back() {
         this.setFullScreen(false)
@@ -273,7 +309,7 @@
         // this.$refs.audio.currentTime = this.currentSong.duration * percent ;// 获取到此时位置
         const currentTime = this.currentSong.duration * percent;
         this.$refs.audio.currentTime = currentTime;
-        if(!this.playing){
+        if (!this.playing) {
           this.togglePlaying()
         }
       },
@@ -337,11 +373,17 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX'
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setMode: 'SET_PLAY_MODE',
+        setPlayList: 'SET_PLAYLIST'
       })
     },
     watch: {
       currentSong(newSong, oldSong) {
+        //避免 切换模式 时当前歌曲不改变
+        if(newSong.id===oldSong.id){
+          return false
+        }
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
           this.$refs.audio.play();
