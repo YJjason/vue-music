@@ -1,7 +1,7 @@
 <template>
-  <div class="singer">
+  <div class="singer" ref="singer">
     <!-- listview 列表组件 -->
-    <list-view :data="singers"
+    <list-view :data="singers" ref="list"
     @select="selectSinger">
 
     </list-view>
@@ -19,11 +19,14 @@
 //语法糖
   import {mapMutations} from 'vuex'
 
+  import {playlistMixin} from "../../common/js/mixin";
 
-  const HOT_SINGER_LEN = 10
-  const HOT_NAME = '热门'
+
+  const HOT_SINGER_LEN = 10;
+  const HOT_NAME = '热门';
   export default {
     name: "singer",
+    mixins:[playlistMixin],
     data() {
       return {
         singers: []
@@ -36,7 +39,11 @@
       this._getSingerList()
     },
     methods: {
-
+      handlePlaylist(playlist){
+        const bottom = playlist.length>0?'60px':'';
+        this.$refs.singer.style.bottom=bottom;
+        this.$refs.list.refresh()
+      },
       _getSingerList() {
         getSingerList().then(res => {
           if (res.code === ERR_OK) {
@@ -51,7 +58,7 @@
             title: HOT_NAME,
             items: []
           }
-        }
+        };
         list.forEach((item, index) => {
           // 取数据的前10条为热门歌曲
           if (index < HOT_SINGER_LEN) {
@@ -61,7 +68,7 @@
               id: item.Fsinger_mid
             }))
           }
-          const key = item.Findex
+          const key = item.Findex;
           if (!map[key]) {
             map[key] = {
               title: key,
@@ -72,12 +79,12 @@
             name: item.Fsinger_name,
             id: item.Fsinger_mid
           }))
-        })
+        });
         //为了得到有序列表，我们需要处理 map
-        let ret = []   // 序列
-        let hot = []  // 热门
+        let ret = [];   // 序列
+        let hot = [];  // 热门
         for (let key in map) {
-          let val = map[key]
+          let val = map[key];
           if (val.title.match(/[a-zA-Z]/)) {
             ret.push(val)
           } else if (val.title === HOT_NAME) {
@@ -86,13 +93,13 @@
         }
         ret.sort((a, b) => {
           return a.title.charCodeAt(0) - b.title.charCodeAt(0)
-        })
+        });
         return hot.concat(ret)
       },
       selectSinger(singer){
           this.$router.push({
             path:`/singer/${singer.id}`
-          })
+          });
           //实现mutations 的提交  相当于 this.$store.xxx.commit()
           this.setSinger(singer)
       },

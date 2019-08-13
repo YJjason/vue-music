@@ -135,6 +135,9 @@
       Loading
     },
     methods: {
+      refresh(){
+        this.$refs.listview.refresh()
+      },
       // touch 事件
       onShortcutTouchStart(e) {
         // 获取右侧快速入口点击的是哪个的下标

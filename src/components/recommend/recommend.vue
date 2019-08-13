@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
     <scroll ref="scroll" class="recommend-content"
             :data="recommendList">
       <div>
@@ -46,8 +46,11 @@
   import Slider from '../../base/slider/slider'
   import Scroll from '../../base/scroll/scroll'
 
+  import {playlistMixin} from "../../common/js/mixin";
+
   export default {
     name: "recommend",
+    mixins:[playlistMixin],
     data() {
       return {
         recommends: [],
@@ -59,10 +62,15 @@
       Scroll
     },
     created() {
-      this._getRecommend()
+      this._getRecommend();
       this._getDiscList()
     },
     methods: {
+      handlePlaylist(playlist){
+        const bottom = playlist.length>0?'60px':'';
+        this.$refs.recommend.style.bottom=bottom;
+        this.$refs.scroll.refresh()
+      },
       _getRecommend() {
         getRecommend().then(res => {
           if (res.code === ERR_OK) {
@@ -79,7 +87,7 @@
       },
       loadImage() {
         if (!this.checkLoaded) {
-          this.$refs.scroll.refresh()
+          this.$refs.scroll.refresh();
           this.checkLoaded = true
         }
 

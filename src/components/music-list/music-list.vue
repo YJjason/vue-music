@@ -39,13 +39,17 @@
   import getSongVkey from '../../api/get_song_vkey';
   import {mapActions,mapState,mapGetters} from 'vuex';
 
+  import {playlistMixin} from "../../common/js/mixin";
+
   const RESERVED_HEIGHT = 40;
 
   const transform = prefixStyle('transfrom');
   const backdrop = prefixStyle('backdrop-filter');
 
   export default {
+
     name: "music-list",
+    mixins:[playlistMixin], // 插入mixins
     props: {
       bgImage: {
         type: String,
@@ -92,6 +96,11 @@
 
     },
     methods: {
+      handlePlaylist(playlist){
+        const bottom = playlist.length>0?'60px':'';
+        this.$refs.list.$el.style.bottom=bottom;
+        this.$refs.list.refresh()
+      },
       //监听滚动
       scroll(pos) {
         this.scrollY = pos.y;

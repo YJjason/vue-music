@@ -319,7 +319,7 @@
           return
         }
         //歌曲为1条
-        if (this.playList.length === 1) {
+        if (this.playlist.length === 1) {
           this.loop()
         } else {
           let index = this.currentIndex + 1;
