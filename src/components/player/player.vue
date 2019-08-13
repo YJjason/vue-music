@@ -118,7 +118,7 @@
   import {prefixStyle} from "../../common/js/dom";
 
   const transform = prefixStyle('transform');
-  const transitionDuration = prefixStyle('transitionDuration')
+  const transitionDuration = prefixStyle('transitionDuration');
   export default {
     name: "player",
     data() {
@@ -179,9 +179,9 @@
       changeMode() {
         const mode = (this.mode + 1) % 3;
         //触发mutation 修改state 值
-        this.setMode(mode)
+        this.setMode(mode);
         //根据mode 重新赋值播放列表
-        let list = null
+        let list = null;
         if (mode == playMode.random) {
           //重新洗牌数据
           list = shuffle(this.sequenceList)
@@ -189,14 +189,14 @@
           list = this.sequenceList
         }
         //切换播放模式，不改变当前播放
-        this.resetCurrentIndex(list)
+        this.resetCurrentIndex(list);
         this.setPlayList(list)
       },
 
       resetCurrentIndex(list) {
         let index = list.findIndex(item => {
           return item.id === this.currentSong.id;
-        })
+        });
         this.setCurrentIndex(index)
       },
       //缩小播放器，mini播放器
@@ -249,7 +249,7 @@
       //播放器控制
       togglePlaying(e) {
         e.preventDefault();
-        this.setPlayingState(!this.playing)
+        this.setPlayingState(!this.playing);
         // this.currentLyric.stop()
         if (this.currentLyric) {
           this.currentLyric.togglePlay()
@@ -257,9 +257,9 @@
       },
       //获取歌词
       getLyric() {
-        console.log(122, this.currentSong)
+        console.log(122, this.currentSong);
         this.currentSong.getLyric().then(res => {
-          console.log(1222, res)
+          console.log(1222, res);
           this.currentLyric = new Lyric(res, this.handleLyric);
           if (this.playing) {
             this.currentLyric.play()
@@ -271,7 +271,7 @@
         })
       },
       handleLyric({lineNum, txt}) {
-        this.currentLineNum = lineNum
+        this.currentLineNum = lineNum;
         if (lineNum > 5) {
           let lineEl = this.$refs.lyricLine[lineNum - 5];
           this.$refs.lyricList.scrollToElement(lineEl, 1000)
@@ -308,8 +308,8 @@
         }
       },
       loop() {
-        this.$refs.audio.currentTime = 0
-        this.$refs.audio.play()
+        this.$refs.audio.currentTime = 0;
+        this.$refs.audio.play();
         if (this.currentLyric) {
           this.currentLyric.seek(0)  // 歌曲的开始位置
         }
@@ -367,22 +367,22 @@
         this.touch.startX = touch.pageX;
         this.touch.startY = touch.pageY
       },
-      middleTouchMove(e) {
+      middleTouchMove: function (e) {
         if (!this.touch.initiated) {
           return
         }
-        const touch = e.touches[0]
-        const deltaX = touch.pageX - this.touch.startX
-        const deltaY = touch.pageY - this.touch.startY
+        const touch = e.touches[0];
+        const deltaX = touch.pageX - this.touch.startX;
+        const deltaY = touch.pageY - this.touch.startY;
         if (Math.abs(deltaY) > Math.abs(deltaX)) {
           return
         }
-        const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
-        const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
-        this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
-        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
-        this.$refs.lyricList.$el.style[transitionDuration] = 0
-        this.$refs.middleL.style.opacity = 1 - this.touch.percent
+        const left = this.currentShow === 'cd' ? 0 : -window.innerWidth;
+        const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX));
+        this.touch.percent = Math.abs(offsetWidth / window.innerWidth);
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
+        this.$refs.lyricList.$el.style[transitionDuration] = 0;
+        this.$refs.middleL.style.opacity = 1 - this.touch.percent;
         this.$refs.middleL.style[transitionDuration] = 0
       },
       middleTouchEnd(e) {
@@ -390,28 +390,28 @@
         let opacity;
         if (this.currentShow === 'cd') {
           if (this.touch.percent > 0.1) {
-            this.currentShow = 'lyric'
-            offsetWidth = -window.innerWidth
+            this.currentShow = 'lyric';
+            offsetWidth = -window.innerWidth;
             opacity = 0
           } else {
-            offsetWidth = 0
+            offsetWidth = 0;
             opacity = 1
           }
         } else {
           if (this.touch.percent < 0.9) {
-            this.currentShow = 'cd'
-            offsetWidth = 0
+            this.currentShow = 'cd';
+            offsetWidth = 0;
             opacity = 1
           } else {
-            offsetWidth = -window.innerWidth
+            offsetWidth = -window.innerWidth;
             opacity = 0
           }
         }
-        let time = 300
-        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`
-        this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
-        this.$refs.middleL.style.opacity = opacity
-        this.$refs.middleL.style[transitionDuration] = `${time}ms`
+        let time = 300;
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px,0,0)`;
+        this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`;
+        this.$refs.middleL.style.opacity = opacity;
+        this.$refs.middleL.style[transitionDuration] = `${time}ms`;
         this.touch.initiated = false
 
       },
@@ -459,10 +459,10 @@
         let paddingLeft = 40;
         let paddingBottom = 30;
         let paddingTop = 80;
-        let width = window.innerWidth * 0.8
-        let scale = targetWidth / width  //缩放比
-        let x = -(window.innerWidth / 2 - paddingLeft)
-        let y = window.innerWidth - paddingTop - width / 2 - paddingBottom
+        let width = window.innerWidth * 0.8;
+        let scale = targetWidth / width;  //缩放比
+        let x = -(window.innerWidth / 2 - paddingLeft);
+        let y = window.innerWidth - paddingTop - width / 2 - paddingBottom;
         return {
           x,
           y,

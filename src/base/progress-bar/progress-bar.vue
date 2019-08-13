@@ -47,7 +47,7 @@
 
         this._offset(offsetWidth)
       },
-      progressTouchEnd(e) {
+      progressTouchEnd() {
         this.touch.initiated = false;
         //派发事件
         this._triggerPercent()
@@ -56,13 +56,13 @@
       //点击滑块
       progressClick(e) {
         //点击到progress 小圆圈
-        const rect = this.$refs.progressBar.getBoundingClientRect()
-        let offsetWidth = e.pageX - rect.left
-       /* if (offsetWidth > rect.width) {
-          offsetWidth = rect.width-32
-        }*/
+        const rect = this.$refs.progressBar.getBoundingClientRect();
+        let offsetWidth = e.pageX - rect.left;
+        /* if (offsetWidth > rect.width) {
+           offsetWidth = rect.width-32
+         }*/
         // this._offset(e.offsetX);
-        this._offset(offsetWidth)
+        this._offset(offsetWidth);
         this._triggerPercent()
       },
       //拖动滑块之后 滑块位置
