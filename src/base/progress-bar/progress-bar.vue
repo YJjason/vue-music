@@ -28,44 +28,50 @@
         default: 0
       }
     },
-    created(){
-      this.touch={}
+    created() {
+      this.touch = {}
     },
-    methods:{
-      progressTouchStart(e){
-        console.log(23,e)
-        this.touch.initiated=true;
+    methods: {
+      progressTouchStart(e) {
+        this.touch.initiated = true;
         this.touch.startX = e.touches[0].pageX;
         this.touch.left = this.$refs.progress.clientWidth;
 
       },
-      progressTouchMove(e){
-        if(!this.touch.initiated){
+      progressTouchMove(e) {
+        if (!this.touch.initiated) {
           return
         }
-        const deltaX = e.touches[0].pageX-this.touch.startX;
-        const offsetWidth =Math.min(this.$refs.progressBar.clientWidth-progressBtnWidth,  Math.max(0,this.touch.left + deltaX));  // 防止进度条超出 progress bar
+        const deltaX = e.touches[0].pageX - this.touch.startX;
+        const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtnWidth, Math.max(0, this.touch.left + deltaX));  // 防止进度条超出 progress bar
 
-        this._offset(offsetWidth )
+        this._offset(offsetWidth)
       },
-      progressTouchEnd(e){
-          this.touch.initiated=false;
+      progressTouchEnd(e) {
+        this.touch.initiated = false;
         //派发事件
         this._triggerPercent()
 
       },
       //点击滑块
-      progressClick(e){
-        this._offset(e.offsetX);
+      progressClick(e) {
+        //点击到progress 小圆圈
+        const rect = this.$refs.progressBar.getBoundingClientRect()
+        let offsetWidth = e.pageX - rect.left
+       /* if (offsetWidth > rect.width) {
+          offsetWidth = rect.width-32
+        }*/
+        // this._offset(e.offsetX);
+        this._offset(offsetWidth)
         this._triggerPercent()
       },
       //拖动滑块之后 滑块位置
-      _triggerPercent(){
+      _triggerPercent() {
         const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
         const percent = this.$refs.progress.clientWidth / barWidth;
-         this.$emit('percentChange',percent)
+        this.$emit('percentChange', percent)
       },
-      _offset(offsetWidth){
+      _offset(offsetWidth) {
         this.$refs.progress.style.width = `${offsetWidth}px`;
         this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`;
       }
@@ -73,12 +79,12 @@
     },
     watch: {
       percent(newPercent) {
-        if (newPercent  && !this.touch.initiated) { // 满足不再拖动时
+        if (newPercent && !this.touch.initiated) { // 满足不再拖动时
           const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth;
           const offsetWidth = newPercent * barWidth;
           this._offset(offsetWidth)
-         /* this.$refs.progress.style.width = `${offsetWidth}px`;
-          this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`;*/
+          /* this.$refs.progress.style.width = `${offsetWidth}px`;
+           this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0`;*/
         }
       }
     }

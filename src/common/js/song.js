@@ -23,11 +23,11 @@ export default class Song {
   }
 
   getLyric () {
-    console.log('lyric',this.lyric)
     if (this.lyric) {
       return Promise.resolve(this.lyric)
     }
     return new Promise((resolve, reject) => {
+      //接口请求
       getLyric(this.mid).then(res => {
         if (res.code === ERR_OK) {
           this.lyric = Base64.decode(res.lyric)

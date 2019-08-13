@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div class="play" ref="playBtn" v-show="songs.length">
+        <div class="play" ref="playBtn" v-show="songs.length" @click="random">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -37,7 +37,7 @@
   import {prefixStyle} from "../../common/js/dom";
   import Loading from '../../base/loading/loading';
   import getSongVkey from '../../api/get_song_vkey';
-  import {mapActions} from 'vuex';
+  import {mapActions,mapState,mapGetters} from 'vuex';
 
   const RESERVED_HEIGHT = 40;
 
@@ -85,6 +85,11 @@
       bgStyle() {
         return `background-image:url(${this.bgImage});`
       },
+      ...mapGetters([
+        'currentIndex',
+        'playlist'
+      ]),
+
     },
     methods: {
       //监听滚动
@@ -130,12 +135,46 @@
         })
 
       },
+      //随机播放
+      random(){
+        this.randomPlay({
+          list:this.songs
+        })
+        let currentSong = this.playlist[this.currentIndex]
+        getSongVkey(currentSong.mid).then(res => {
+          let targetSong = null;
+          if (res.code === 0) {
+            let vkey = res.data.items[0].vkey;
+            let filename = res.data.items[0].filename;
+            if (vkey) {
+              targetSong = {
+                id: currentSong.id,
+                url: `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=5705112900&uin=0&fromtag=66`
+              }
+            } else {
+              targetSong = {
+                id: currentSong.id,
+                url: ''
+              };
+              alert('该歌曲已下架');
+              return
+            }
+          }
+          this.setSelectVkey({
+            obj: targetSong
+          });
+          //修改 歌曲的播放地址
+          this.$emit('selectSong', targetSong)
+        });
+      },
 
       //mapAction 代理actions
       ...mapActions([
         'selectPlay',
-        'setSelectVkey'
+        'setSelectVkey',
+        'randomPlay'
       ]),
+
     },
     watch: {
       scrollY(newY) {
