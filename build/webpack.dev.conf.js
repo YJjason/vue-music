@@ -98,22 +98,32 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       })
       /*获取歌词*/
       /*获取歌单*/
-      app.get('/api/getSongList',(req,res)=>{
-        let url ='https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
-        axios.get(url,{
-          headers:{
+      app.get('/api/getSongList', (req, res) => {
+        let url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+        axios.get(url, {
+          headers: {
             Referer: 'https://y.qq.com/n/yqq/playsquare/6998904583.html'
           },
-          params:req.query
-        }).then(response=>{
+          params: req.query
+        }).then(response => {
           res.json(response.data)
-        }).catch(error=>{
+        }).catch(error => {
           res.json(error);
           console.log(error)
         })
       })
       /*获取歌单*/
-
+      /*获取榜单*/
+      app.post('/api/getBank',(req,res)=>{
+        let url ='https://u.y.qq.com/cgi-bin/musicu.fcg'
+        axios.post(url,{
+          header:{
+            Referer: 'https://y.qq.com/m/index.html'
+          }
+        }).then(response=>{
+          console.log(122,response)
+        })
+      })
     }
 
   },
