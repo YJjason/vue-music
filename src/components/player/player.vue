@@ -1,6 +1,11 @@
 <template>
   <div class="player" v-show="playlist.length>0">
-    <transition name="normal">
+    <transition name="normal"
+                @enter="enter"
+                @after-enter='afterEnter'
+                @leave="leave"
+                @after-leave="afterLeave"
+    >
       <!--      normal player-->
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
@@ -21,7 +26,7 @@
         >
           <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
+              <div class="cd" :class="cdCls">
                 <img :src="currentSong.image" alt="" class="image">
               </div>
             </div>
@@ -234,21 +239,22 @@
       afterEnter() {
         animations.unregisterAnimation('move');
         this.$refs.cdWrapper.style.animation = ''
-
       },
       leave(el, done) {
-        this.$refs.cdWrapper.style.animation = 'all .4';
+        this.$refs.cdWrapper.style.transition = 'all 0.4s';
         const {x, y, scale} = this._getPosAndScale();
         this.$refs.cdWrapper.style[transform] = `translate3d(${x}px,${y}px,0) scale(${scale})`;
-        this.$refs.cdWrapper.addEventListener('transitioned', done)
+        this.$refs.cdWrapper.addEventListener('transitionend', done)
       },
-      afterLeave(el, done) {
-        this.$refs.cdWrapper.style.transform = '';
+      afterLeave() {
+        this.$refs.cdWrapper.style.transition = '';
         this.$refs.cdWrapper.style[transform] = ''
       },
       //播放器控制
-      togglePlaying(e) {
-        e.preventDefault();
+      togglePlaying() {
+        if (!this.songReady) {
+          return
+        }
         this.setPlayingState(!this.playing);
         // this.currentLyric.stop()
         if (this.currentLyric) {
@@ -257,9 +263,10 @@
       },
       //获取歌词
       getLyric() {
-        console.log(122, this.currentSong);
         this.currentSong.getLyric().then(res => {
-          console.log(1222, res);
+          if (this.currentSong.lyric !== res) {
+            return
+          }
           this.currentLyric = new Lyric(res, this.handleLyric);
           if (this.playing) {
             this.currentLyric.play()
