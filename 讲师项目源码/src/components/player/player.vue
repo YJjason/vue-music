@@ -378,14 +378,14 @@
         return num
       },
       _getPosAndScale() {
-        const targetWidth = 40
-        const paddingLeft = 40
-        const paddingBottom = 30
-        const paddingTop = 80
-        const width = window.innerWidth * 0.8
-        const scale = targetWidth / width
-        const x = -(window.innerWidth / 2 - paddingLeft)
-        const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
+        let targetWidth = 40
+        let paddingLeft = 40
+        let paddingBottom = 30
+        let paddingTop = 80
+        let width = window.innerWidth * 0.8
+        let scale = targetWidth / width
+        let x = -(window.innerWidth / 2 - paddingLeft)
+        let y = window.innerHeight - paddingTop - width / 2 - paddingBottom
         return {
           x,
           y,
