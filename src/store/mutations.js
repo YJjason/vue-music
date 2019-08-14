@@ -28,6 +28,9 @@ const mutations = {
         item.url = obj.url
       }
     })
+  },
+  [types.SET_DISC](state,disc){
+    state.disc=disc
   }
 
 };
