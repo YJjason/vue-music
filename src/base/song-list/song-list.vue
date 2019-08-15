@@ -5,6 +5,9 @@
           v-for="(song,index) in songs"
           @click="selectItem(song,index)"
           :key="index">
+        <div class="rank" v-show="rank">
+          <span :class="getRankCls(index)">{{getRankText(index)}}</span>
+        </div>
         <div class="content">
           <h2 class="name">{{song.name}}</h2>
           <p class="desc">
@@ -25,6 +28,10 @@
       songs: {
         type: Array,
         default: []
+      },
+      rank:{
+        type:Boolean,
+        deafault:false
       }
     },
     methods: {
@@ -34,6 +41,18 @@
     //  点击播放歌曲
       selectItem(item,index){  //像父组件 music-list 组建派发事件
         this.$emit('select',item,index)
+      },
+      getRankCls(index){
+        if(index<=2){
+          return `icon icon${index}`
+        }else{
+          return `text`
+        }
+      },
+      getRankText(index){
+        if(index>2){
+          return index+1
+        }
       }
     }
   }

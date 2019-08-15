@@ -113,17 +113,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         })
       })
       /*获取歌单*/
-      /*获取榜单*/
-      app.post('/api/getBank',(req,res)=>{
-        let url ='https://u.y.qq.com/cgi-bin/musicu.fcg'
-        axios.post(url,{
-          header:{
-            Referer: 'https://y.qq.com/m/index.html'
-          }
-        }).then(response=>{
-          console.log(122,response)
-        })
-      })
     }
 
   },

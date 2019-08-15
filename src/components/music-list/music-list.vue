@@ -22,7 +22,7 @@
             @scroll="scroll"
             ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs" @select="selectItem"></song-list>
+        <song-list :songs="songs" @select="selectItem" :rank="rank"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -37,7 +37,7 @@
   import {prefixStyle} from "../../common/js/dom";
   import Loading from '../../base/loading/loading';
   import getSongVkey from '../../api/get_song_vkey';
-  import {mapActions,mapState,mapGetters} from 'vuex';
+  import {mapActions, mapState, mapGetters} from 'vuex';
 
   import {playlistMixin} from "../../common/js/mixin";
 
@@ -49,7 +49,7 @@
   export default {
 
     name: "music-list",
-    mixins:[playlistMixin], // 插入mixins
+    mixins: [playlistMixin], // 插入mixins
     props: {
       bgImage: {
         type: String,
@@ -62,6 +62,10 @@
       title: {
         type: String,
         default: ''
+      },
+      rank:{
+        type:Boolean,
+        default:false
       }
     },
     data() {
@@ -96,9 +100,9 @@
 
     },
     methods: {
-      handlePlaylist(playlist){
-        const bottom = playlist.length>0?'60px':'';
-        this.$refs.list.$el.style.bottom=bottom;
+      handlePlaylist(playlist) {
+        const bottom = playlist.length > 0 ? '60px' : '';
+        this.$refs.list.$el.style.bottom = bottom;
         this.$refs.list.refresh()
       },
       //监听滚动
@@ -145,9 +149,9 @@
 
       },
       //随机播放
-      random(){
+      random() {
         this.randomPlay({
-          list:this.songs
+          list: this.songs
         })
         let currentSong = this.playlist[this.currentIndex]
         getSongVkey(currentSong.mid).then(res => {

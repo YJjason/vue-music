@@ -68,7 +68,6 @@
     },
     methods: {
       selectItem(item){
-        console.log(122,item)
         this.$router.push({
           path:`/recommend/${item.dissid}`
         })

@@ -3,17 +3,27 @@ import axios from 'axios'
 import {commonParam, options, ERR_OK} from "./config";
 
 
-export function getRank(){
-  let url ='/api/getRank'
-  const data = Object.assign({}, commonParam, {
-    platform: 'yqq.json',
-    hostUin: 0,
-    needNewCode: 0,
-    format: 'json' // 将format从jsonp修改为json
+export function getRank() {
+  let url = "https://c.y.qq.com/v8/fcg-bin/fcg_myqq_toplist.fcg";
+  // let url = "https://u.y.qq.com/cgi-bin/musicu.fcg";
+  let data = Object.assign({},commonParam,{
+    uin: 0,
+    platform: "h5",
+    needNewCode: 1
+  });
+  // let option = {param: "jsonpCallback"};
+  return jsonp(url,data,options);
+}
+
+export function getMusicList(topid){
+  const url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg'
+  let data=Object.assign({},commonParam,{
+    uin: 0,
+    platform: "h5",
+    needNewCode: 1,
+    topid,
+    type:'top',
+    page:'detail'
   })
-  return axios.post(url, {
-    params: data
-  }).then(res => {
-    return Promise.resolve(res.data)
-  })
+  return jsonp(url,data,options)
 }
