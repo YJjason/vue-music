@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 source
 teachSource
-讲师项目源码
+project_source/
 # Editor directories and files
 .idea
 .vscode
