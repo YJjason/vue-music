@@ -48,10 +48,11 @@
   import Scroll from '../../base/scroll/scroll'
 
   import {playlistMixin} from "../../common/js/mixin"
-  import {mapMutations}  from 'vuex'
+  import {mapMutations} from 'vuex'
+
   export default {
     name: "recommend",
-    mixins:[playlistMixin],
+    mixins: [playlistMixin],
     data() {
       return {
         recommends: [],
@@ -67,15 +68,15 @@
       this._getDiscList()
     },
     methods: {
-      selectItem(item){
+      selectItem(item) {
         this.$router.push({
-          path:`/recommend/${item.dissid}`
+          path: `/recommend/${item.dissid}`
         })
-        this.setDisc(item )
+        this.setDisc(item)
       },
-      handlePlaylist(playlist){
-        const bottom = playlist.length>0?'60px':'';
-        this.$refs.recommend.style.bottom=bottom;
+      handlePlaylist(playlist) {
+        const bottom = playlist.length > 0 ? '60px' : '';
+        this.$refs.recommend.style.bottom = bottom;
         this.$refs.scroll.refresh()
       },
       _getRecommend() {
@@ -100,7 +101,7 @@
 
       },
       ...mapMutations({
-        setDisc:'SET_DISC'
+        setDisc: 'SET_DISC'
       })
     }
   }

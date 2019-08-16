@@ -10,10 +10,18 @@
   export default {
     name: "scroll",
     props: {
+      /**
+       * 1 滚动的时候会派发scroll事件，会截流。
+       * 2 滚动的时候实时派发scroll事件，不会截流。
+       * 3 除了实时派发scroll事件，在swipe的情况下仍然能实时派发scroll事件
+       */
       probeType: {
         type: Number,
         default: 1
       },
+      /**
+       * 点击列表是否派发click事件
+       */
       click: {
         type: Boolean,
         default: true
@@ -22,14 +30,17 @@
         type: Array,
         default: null
       },
+      /*
+      * 拉到底部回弹效果
+      * */
       bounce:{
         top:true,
-        bottom:true
+        bottom:false
       },
       // 是否监听滚动事件
       listenScroll:{
         type:Boolean,
-        default:false
+        default:true
       }
     },
     watch: {

@@ -1,14 +1,39 @@
 <template>
   <div class="search-box">
     <i class="icon-search"></i>
-    <input type="text" class="box">
-    <i class="icon-dismiss"></i>
+    <input type="text" class="box" v-model="query" :placeholder="placeholder">
+    <i v-show="query" @click="clear" class="icon-dismiss"></i>
   </div>
 </template>
 
 <script>
   export default {
-    name: "search-box"
+    name: "search-box",
+    props: {
+      placeholder: {
+        type: String,
+        default: '搜索歌手、歌曲'
+      }
+    },
+    created() {
+      //  监听query 的变化，对外派发事件
+      this.$watch('query', (newQuery => {
+        this.$emit('query', newQuery)
+      }))
+    },
+    data() {
+      return {
+        query: ''
+      }
+    },
+    methods: {
+      clear() {
+        this.query = ''
+      },
+      setQuery(query) {
+        this.query = query
+      }
+    }
   }
 </script>
 <style scoped lang="stylus" rel="stylesheet/stylus">
