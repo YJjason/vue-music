@@ -113,6 +113,23 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         })
       })
       /*获取歌单*/
+
+
+      app.get('/api/search', (req, res) => {
+        let url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
+        axios.get(url, {
+          headers: {
+            Referer: 'https://y.qq.com/m/index.html',
+            contentType: "application/json",
+          },
+          params: req.query
+        }).then(response => {
+          res.json(response.data)
+        }).catch(error => {
+          res.json(error)
+          console.log(error)
+        })
+      })
     }
 
   },
