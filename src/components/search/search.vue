@@ -3,7 +3,7 @@
     <div class="search-box-wrapper">
       <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
-    <div class="shortcut-wrapper">
+    <div class="shortcut-wrapper" v-show="!query">
       <div class="shortcut">
         <div>
           <div class="hot-key">
@@ -26,9 +26,10 @@
         </div>
       </div>
     </div>
-    <div class="search-result">
+    <div class="search-result" v-show="query">
       <suggest :query="query"></suggest>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -65,6 +66,7 @@
         this.$refs.searchBox.setQuery(query)
       },
       onQueryChange(query) {
+        console.log(122,query)
         this.query = query
       }
     }

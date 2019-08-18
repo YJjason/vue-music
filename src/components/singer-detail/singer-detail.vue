@@ -69,7 +69,7 @@
       },
         selectSong(targetSong){
             this.songs.filter(item=>{
-              if (item.id==targetSong.id){
+              if (item.id===targetSong.id){
                 item.url=targetSong.url
               }
             })
