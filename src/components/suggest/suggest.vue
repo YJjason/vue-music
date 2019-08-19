@@ -1,7 +1,9 @@
 <template>
   <Scroll class="suggest" :data="result"
           :pullup="pullup"
+          :beforeScroll="beforeScroll"
           @scrollToEnd="searchMore"
+          @beforeScroll="listScroll"
           ref="suggest"
   >
     <ul class="suggest-list">
@@ -58,7 +60,8 @@
         page: 1,
         result: [],
         pullup: true,
-        hasMore: true
+        hasMore: true,
+        beforeScroll:true
       }
     },
 
@@ -114,6 +117,10 @@
         } else {
           return `${item.name}-${item.singer}`
         }
+      },
+      //兼容手机，滚动列表时，收回键盘
+      listScroll(){
+        this.$emit('listScroll')
       },
       _checkMore(data) {
         let song = data.song;
