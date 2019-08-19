@@ -1,7 +1,13 @@
 <template>
-  <div class="suggest">
+  <Scroll class="suggest" :data="result"
+          :pullup="pullup"
+          @scrollToEnd="searchMore"
+          ref="suggest"
+  >
     <ul class="suggest-list">
-      <li class="suggest-item" v-for="item in result">
+      <li class="suggest-item"
+          v-for="item in result"
+          @click="selectItem(item)">
         <div class="icon">
           <i :class="getClassIcon(item)"></i>
         </div>
@@ -9,19 +15,34 @@
           <p class="text" v-html="getDisplayName(item)"></p>
         </div>
       </li>
+      <loading v-show="hasMore" title="正在加载..."></loading>
     </ul>
-  </div>
+    <div class="no-result-wrapper" v-show="!hasMore&&!result.length">
+      <no-result title="没有搜索到结果..."></no-result>
+    </div>
+  </Scroll>
 </template>
 
 <script>
   import {search} from "../../api/search";
   import {ERR_OK} from "../../api/config";
   import {createSong} from "../../common/js/song";
+  import Scroll from '../../base/scroll/scroll';
+  import Loading from '../../base/loading/loading';
+  import Singer from '../../common/js/singer'
+  import NoResult from '../../base/no-result/no-result'
 
-  const TYPE_SINGER = 'singer'
-  const perpage = 20
+  import {mapMutations,mapActions} from 'vuex'
+
+  const TYPE_SINGER = 'singer';
+  const perpage = 20;
   export default {
     name: "suggest",
+    components: {
+      Scroll,
+      Loading,
+      NoResult
+    },
     props: {
       showSinger: {
         type: Boolean,
@@ -35,43 +56,84 @@
     data() {
       return {
         page: 1,
-        result: []
+        result: [],
+        pullup: true,
+        hasMore: true
       }
     },
 
     methods: {
       _search() {
+        this.page = 1;
+        this.$refs.suggest.scrollTo(0, 0);
+        this.hasMore = true;
         search(this.query, this.page, this.showSinger, perpage).then(res => {
           if (res.code === ERR_OK) {
-            this.result = this._getResult(res.data)
+            this.result = this._getResult(res.data);
+            this._checkMore(res.data)
           }
         })
       },
-      getClassIcon(item){
-        if(item.type===TYPE_SINGER){
-          return 'icon-mine'
+      //上拉加载更多
+      searchMore() {
+        if (!this.hasMore) {
+          return
+        }
+        this.page++;
+        search(this.query, this.page, this.showSinger, perpage).then(res => {
+          if (res.code === ERR_OK) {
+            this.result = this.result.concat(this._getResult(res.data));
+            this._checkMore(res.data)
+          }
+        })
+      },
+      selectItem(item) {
+        if (item.type === TYPE_SINGER) {
+          let singer = new Singer({
+            id: item.singermid,
+            name: item.singername
+          });
+          this.$router.push({
+            path: `/search/${singer.id}`
+          });
+          this.setSinger(singer)
         }else{
+          this.insertSong(item)
+        }
+      },
+      getClassIcon(item) {
+        if (item.type === TYPE_SINGER) {
+          return 'icon-mine'
+        } else {
           return 'icon-music'
         }
       },
-      getDisplayName(item){
-        if(item.type===TYPE_SINGER){
+      getDisplayName(item) {
+        if (item.type === TYPE_SINGER) {
           return item.singername
-        }else{
+        } else {
           return `${item.name}-${item.singer}`
         }
+      },
+      _checkMore(data) {
+        let song = data.song;
+        if (!song.list.length || (song.curnum + song.curpage * 20) > song.totalnum) {
+          this.hasMore = false
+        }
+
       },
       _getResult(data) {
         let ret = []
         if (data.zhida && data.zhida.singerid) {
-          ret.push({...data.zhida}, ...{'type': TYPE_SINGER})
+          ret.push({...data.zhida, 'type': TYPE_SINGER});
         }
         if (data.song) {
-          ret.concat(...(this._normalizeSongs(data.song.list)))
+          ret = ret.concat(...this._normalizeSongs(data.song.list))
         }
         return ret
       },
       _normalizeSongs(list) {
+        console.log('list', list)
         let ret = []
         list.forEach(item => {
           if (item.songid && item.albummid) {
@@ -79,7 +141,13 @@
           }
         })
         return ret
-      }
+      },
+      ...mapMutations({
+        setSinger: 'SET_SINGER'
+      }),
+      ...mapActions([
+        'insertSong'
+      ])
     },
     watch: {
       query(newQuery) {

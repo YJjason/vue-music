@@ -29,6 +29,7 @@
     <div class="search-result" v-show="query">
       <suggest :query="query"></suggest>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -65,6 +66,7 @@
         this.$refs.searchBox.setQuery(query)
       },
       onQueryChange(query) {
+        console.log(122,query)
         this.query = query
       }
     }

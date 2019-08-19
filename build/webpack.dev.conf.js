@@ -115,6 +115,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       /*获取歌单*/
 
 
+      /*获取搜索*/
       app.get('/api/search', (req, res) => {
         let url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
         axios.get(url, {
@@ -130,6 +131,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           console.log(error)
         })
       })
+      /*获取搜索*/
+
     }
 
   },
