@@ -42,7 +42,6 @@
     methods: {
       _search() {
         search(this.query, this.page, this.showSinger, perpage).then(res => {
-          console.log(122, res)
           if (res.code === ERR_OK) {
             this.result = this._getResult(res.data)
           }
@@ -68,7 +67,7 @@
           ret.push({...data.zhida}, ...{'type': TYPE_SINGER})
         }
         if (data.song) {
-          ret.concat(this._normalizeSongs(data.song.list))
+          ret.concat(...(this._normalizeSongs(data.song.list)))
         }
         return ret
       },
