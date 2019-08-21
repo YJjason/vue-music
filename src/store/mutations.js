@@ -34,6 +34,10 @@ const mutations = {
   },
   [types.SET_TOP_LIST](state,list){
     state.toplist=list
+  },
+  //搜索历史
+  [types.SET_SEARCH_HISTORY](state,list){
+    state.searchHistory=list
   }
 
 };

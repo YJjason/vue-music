@@ -33,8 +33,9 @@
   import Loading from '../../base/loading/loading';
   import Singer from '../../common/js/singer'
   import NoResult from '../../base/no-result/no-result'
+  import getSongVkey from '../../api/get_song_vkey';
 
-  import {mapMutations,mapActions} from 'vuex'
+  import {mapMutations, mapActions} from 'vuex'
 
   const TYPE_SINGER = 'singer';
   const perpage = 20;
@@ -61,7 +62,7 @@
         result: [],
         pullup: true,
         hasMore: true,
-        beforeScroll:true
+        beforeScroll: true
       }
     },
 
@@ -99,10 +100,19 @@
           this.$router.push({
             path: `/search/${singer.id}`
           });
+
           this.setSinger(singer)
-        }else{
-          this.insertSong(item)
+        } else {
+          getSongVkey(item.mid).then(res => {
+            const filename = res.data.items[0].filename
+            const vKey = res.data.items[0].vkey
+            item.url = `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vKey}&guid=5705112900&uin=0&fromtag=66`
+            // let tempItem = JSON.parse(JSON.stringify(item))
+            this.insertSong(item)
+          })
         }
+        //派发select 事件保存搜索的内容
+        this.$emit('select')
       },
       getClassIcon(item) {
         if (item.type === TYPE_SINGER) {
@@ -119,7 +129,7 @@
         }
       },
       //兼容手机，滚动列表时，收回键盘
-      listScroll(){
+      listScroll() {
         this.$emit('listScroll')
       },
       _checkMore(data) {
@@ -140,7 +150,6 @@
         return ret
       },
       _normalizeSongs(list) {
-        console.log('list', list)
         let ret = []
         list.forEach(item => {
           if (item.songid && item.albummid) {
