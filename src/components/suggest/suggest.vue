@@ -67,6 +67,9 @@
     },
 
     methods: {
+      refresh(){
+        this.$refs.suggest.refresh()
+      },
       _search() {
         this.page = 1;
         this.$refs.suggest.scrollTo(0, 0);
