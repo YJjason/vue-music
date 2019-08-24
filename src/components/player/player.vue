@@ -96,17 +96,20 @@
               <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i>
             </progress-circle>
           </div>
-          <div class="control">
+          <!--mini播放器右侧按钮-->
+          <div class="control" @click.stop="showPlaylist">
             <i class="icon-playlist"></i>
           </div>
         </div>
-        <audio ref="audio" :src="currentSong.url"
-               @canplay="ready" @error="error"
-               @timeupdate="updateTime"
-               @ended="end"
-        ></audio>
+
       </div>
     </transition>
+    <playlist ref="playlist"></playlist>
+    <audio ref="audio" :src="currentSong.url"
+           @canplay="ready" @error="error"
+           @timeupdate="updateTime"
+           @ended="end"
+    ></audio>
   </div>
 </template>
 
@@ -121,6 +124,8 @@
   import {playMode} from '../../common/js/config'
   import {shuffle} from '../../common/js/util'
   import {prefixStyle} from "../../common/js/dom";
+
+  import Playlist from '../../components/playlist/playlist'
 
   const transform = prefixStyle('transform');
   const transitionDuration = prefixStyle('transitionDuration');
@@ -141,7 +146,8 @@
     components: {
       Scroll,
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Playlist
     },
     created() {
       this.touch = {}
@@ -180,6 +186,10 @@
 
 
     methods: {
+      //当前播放列表
+      showPlaylist() {
+        this.$refs.playlist.show()
+      },
       //改变播放模式
       changeMode() {
         const mode = (this.mode + 1) % 3;
@@ -490,6 +500,10 @@
     },
     watch: {
       currentSong(newSong, oldSong) {
+        //歌曲播放完之后，或者只有一首歌曲，不在进行监听
+        if (!newSong.id) {
+          return
+        }
         //避免 切换模式 时当前歌曲不改变
         if (newSong.id === oldSong.id) {
           return false
