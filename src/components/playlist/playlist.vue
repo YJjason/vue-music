@@ -4,9 +4,10 @@
       <div class="list-wrapper" @click.stop>
         <div class="list-header">
           <h1 class="title">
-            <i class="icon"></i>
-            <span class="text"></span>
-            <span class="clear">
+            <!--播放模式-->
+            <i class="icon" :class="iconMode" @click="changeMode"></i>
+            <span class="text">{{modeText}}</span>
+            <span class="clear" @click="showConfirm">
                 <i class="icon-clear"></i>
               </span>
           </h1>
@@ -36,6 +37,7 @@
           <span>关闭</span>
         </div>
       </div>
+      <confirm ref="confirm" text="是否清空播放列表" @confirm="confirmClear"  confirmBtnText="清空"></confirm>
     </div>
   </transition>
 </template>
@@ -45,26 +47,41 @@
   import Scroll from '../../base/scroll/scroll'
   import getSongVkey from '../../api/get_song_vkey';
   import {mapGetters, mapMutations, mapActions} from 'vuex'
+  import Confirm from '../../base/confirm/confirm'
+  import {playerMixin} from "../../common/js/mixin";
 
   export default {
     name: "playlist",
+    mixins:[playerMixin],
     data() {
       return {
         showFlag: false
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Confirm
     },
     computed: {
-      ...mapGetters([
+      /*mixin */
+ /*     ...mapGetters([
         'sequenceList',
         'currentSong',
         'mode',
         'playlist'
-      ])
+      ])*/
+      modeText(){
+        return this.mode ===playMode.sequence?'顺序播放':this.mode ===playMode.random?'随机播放':'单曲循环'
+      }
     },
     methods: {
+      showConfirm(){
+        this.$refs.confirm.show()
+      },
+      confirmClear(){
+        this.deleteSongList();
+        this.hide()
+      },
       show() {
         this.showFlag = true
         setTimeout(() => {
@@ -132,13 +149,15 @@
         }
 
       },
-      ...mapMutations({
+      /*mixin*/
+    /*  ...mapMutations({
         'setCurrentIndex': 'SET_CURRENT_INDEX',
         'setPlayingState': 'SET_PLAYING_STATE',
-      }),
+      }),*/
       ...mapActions([
         'setSelectVkey',
-        'deleteSong'
+        'deleteSong',
+        'deleteSongList'
       ])
     },
     watch: {

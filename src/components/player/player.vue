@@ -122,7 +122,9 @@
   import ProgressBar from '../../base/progress-bar/progress-bar'
   import ProgressCircle from '../../base/progress-circle/progress-circle'
   import {playMode} from '../../common/js/config'
-  import {shuffle} from '../../common/js/util'
+  /*使用mixin */
+  import {playerMixin} from "../../common/js/mixin";
+  // import {shuffle} from '../../common/js/util'
   import {prefixStyle} from "../../common/js/dom";
 
   import Playlist from '../../components/playlist/playlist'
@@ -131,6 +133,7 @@
   const transitionDuration = prefixStyle('transitionDuration');
   export default {
     name: "player",
+    mixins:[playerMixin],
     data() {
       return {
         currentLyric: null,
@@ -168,18 +171,18 @@
       disableCls() {
         return this.songReady ? '' : 'disable'
       },
-      iconMode() {
+   /*   iconMode() {
         return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-      },
+      },*/
       ...mapGetters([
         'fullScreen',
-        'playlist',
-        'currentSong',
         'playing',
         'currentIndex',
+       /* 'playlist',
+        'currentSong',
         'mode',
         'sequence',
-        'sequenceList'
+        'sequenceList'*/
       ]),
 
     },
@@ -191,7 +194,7 @@
         this.$refs.playlist.show()
       },
       //改变播放模式
-      changeMode() {
+   /*   changeMode() {
         const mode = (this.mode + 1) % 3;
         //触发mutation 修改state 值
         this.setMode(mode);
@@ -213,7 +216,7 @@
           return item.id === this.currentSong.id;
         });
         this.setCurrentIndex(index)
-      },
+      },*/
       //缩小播放器，mini播放器
       back() {
         this.setFullScreen(false)
@@ -488,10 +491,10 @@
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlayingState: 'SET_PLAYING_STATE',
+       /* setPlayingState: 'SET_PLAYING_STATE',
         setCurrentIndex: 'SET_CURRENT_INDEX',
         setMode: 'SET_PLAY_MODE',
-        setPlayList: 'SET_PLAYLIST'
+        setPlayList: 'SET_PLAYLIST'*/
       }),
       ...mapActions([
         'setSelectVkey'
